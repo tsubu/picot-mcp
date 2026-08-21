@@ -1,0 +1,23 @@
+{
+	"name": "picot/picot-mcp",
+	"description": "Picot MCP plugin: MCP server with API key auth and scoped abilities for WordPress.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.4",
+		"automattic/jetpack-autoloader": "^5.0",
+		"wordpress/mcp-adapter": "^0.6"
+	},
+	"autoload": {
+		"classmap": [
+			"includes/"
+		]
+	},
+	"config": {
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true
+		},
+		"optimize-autoloader": true,
+		"sort-packages": true
+	}
+}

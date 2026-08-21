@@ -1,0 +1,1022 @@
+# Japanese translation for Picot MCP
+# Copyright (C) PICOT
+msgid ""
+msgstr ""
+"Project-Id-Version: Picot MCP 0.1.11\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/picot-mcp\n"
+"POT-Creation-Date: 2026-08-21T07:09:01+00:00\n"
+"PO-Revision-Date: 2026-08-21 06:30+0000\n"
+"Last-Translator: PICOT\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Domain: picot-mcp\n"
+
+#. Plugin Name of the plugin
+#: picot-mcp.php includes/class-picot-mcp-abilities.php:86
+#: includes/class-picot-mcp-admin.php:57 includes/class-picot-mcp-admin.php:502
+#: includes/class-picot-mcp-admin.php:526
+#: includes/class-picot-mcp-server.php:91
+msgid "Picot MCP"
+msgstr "Picot MCP"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: picot-mcp.php
+msgid "https://picot.tokyo/"
+msgstr "https://picot.tokyo/"
+
+#. Description of the plugin
+#: picot-mcp.php
+msgid ""
+"Exposes WordPress as an MCP server with API key authentication and scoped "
+"permissions."
+msgstr ""
+"APIキー認証とスコープ付き権限で WordPress を MCP サーバーとして公開します。"
+
+#. Author of the plugin
+#: picot-mcp.php
+msgid "PICOT"
+msgstr "PICOT"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:26
+msgid "WordPress Content"
+msgstr "WordPress コンテンツ"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:27
+msgid "List, search, get, create, update, or trash posts and pages."
+msgstr "投稿・固定ページの一覧、検索、取得、作成、更新、ゴミ箱へ移動。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:35
+msgid "Content type."
+msgstr "コンテンツタイプ。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:39
+msgid "Post or page ID."
+msgstr "投稿または固定ページの ID。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:43
+msgid "Search keyword."
+msgstr "検索キーワード。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:47
+msgid "Post status."
+msgstr "投稿ステータス。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:102
+msgid "type must be post or page."
+msgstr "type は post または page である必要があります。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:122
+#: includes/abilities/class-picot-mcp-ability-media.php:85
+#: includes/abilities/class-picot-mcp-ability-plugins.php:104
+#: includes/abilities/class-picot-mcp-ability-settings.php:120
+#: includes/abilities/class-picot-mcp-ability-taxonomy.php:85
+#: includes/abilities/class-picot-mcp-ability-themes.php:95
+#: includes/abilities/class-picot-mcp-ability-users.php:120
+msgid "Unknown action."
+msgstr "不明なアクションです。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:181
+#: includes/abilities/class-picot-mcp-ability-content.php:239
+#: includes/abilities/class-picot-mcp-ability-content.php:333
+#: includes/class-picot-mcp-permissions.php:191
+msgid "Content not found."
+msgstr "コンテンツが見つかりません。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:288
+msgid "Unsupported post status."
+msgstr "サポートされていない投稿ステータスです。"
+
+#. translators: %s: capability name
+#: includes/abilities/class-picot-mcp-ability-content.php:298
+#: includes/abilities/class-picot-mcp-ability-content.php:312
+#: includes/class-picot-mcp-permissions.php:170
+msgid "WordPress capability \"%s\" is required."
+msgstr "WordPress 権限「%s」が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-content.php:343
+msgid "Failed to move content to trash."
+msgstr "コンテンツをゴミ箱へ移動できませんでした。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:26
+msgid "WordPress Media"
+msgstr "WordPress メディア"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:27
+msgid "List, upload, update, or delete media. Upload uses Base64."
+msgstr "メディアの一覧、アップロード、更新、削除。アップロードは Base64 です。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:136
+#: includes/abilities/class-picot-mcp-ability-media.php:273
+#: includes/abilities/class-picot-mcp-ability-media.php:321
+msgid "Media not found."
+msgstr "メディアが見つかりません。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:162
+msgid "filename and base64_data are required."
+msgstr "filename と base64_data が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:171
+#: includes/class-picot-mcp-util.php:96
+msgid "Invalid Base64 data."
+msgstr "Base64 データが無効です。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:176
+msgid "File exceeds the maximum upload size."
+msgstr "ファイルが最大アップロードサイズを超えています。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:181
+#: includes/abilities/class-picot-mcp-ability-media.php:194
+msgid "File type is not allowed."
+msgstr "このファイル形式は許可されていません。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:205
+#: includes/class-picot-mcp-util.php:113 includes/class-picot-mcp-util.php:177
+msgid "Could not create a temporary file."
+msgstr "一時ファイルを作成できませんでした。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:211
+#: includes/class-picot-mcp-util.php:125
+msgid "Could not write temporary file."
+msgstr "一時ファイルに書き込めませんでした。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:217
+msgid "File type validation failed."
+msgstr "ファイル形式の検証に失敗しました。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:232
+#: includes/abilities/class-picot-mcp-ability-media.php:296
+msgid "WordPress capability \"edit_post\" is required for the parent post."
+msgstr "親投稿には WordPress 権限「edit_post」が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-media.php:331
+msgid "Failed to delete media."
+msgstr "メディアの削除に失敗しました。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:26
+msgid "WordPress Plugins"
+msgstr "WordPress プラグイン"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:27
+msgid ""
+"List and manage plugins. Install from wordpress.org, transfer ZIP packages "
+"via Base64 export/install."
+msgstr ""
+"プラグインの一覧と管理。wordpress.org からのインストール、Base64 による ZIP "
+"パッケージのエクスポート／インストール。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:34
+msgid "Plugin file (folder/file.php) or wordpress.org slug for install."
+msgstr ""
+"プラグインファイル（folder/file.php）またはインストール用 wordpress.org ス"
+"ラッグ。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:38
+msgid "wordpress.org plugin slug (install only)."
+msgstr "wordpress.org プラグインスラッグ（インストール時のみ）。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:42
+#: includes/abilities/class-picot-mcp-ability-themes.php:39
+msgid ""
+"ZIP filename for install_zip / optional export_zip name (must end with .zip)."
+msgstr ""
+"install_zip 用の ZIP ファイル名／export_zip の任意の名前（.zip で終わる必要が"
+"あります）。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:46
+#: includes/abilities/class-picot-mcp-ability-themes.php:43
+msgid "Base64-encoded ZIP contents for install_zip."
+msgstr "install_zip 用の Base64 エンコードされた ZIP 内容。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:50
+msgid "Overwrite an existing plugin package when using install_zip."
+msgstr "install_zip 時に既存のプラグインパッケージを上書きする。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:144
+#: includes/abilities/class-picot-mcp-ability-plugins.php:282
+msgid "Plugin not found."
+msgstr "プラグインが見つかりません。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:174
+msgid "A wordpress.org plugin slug is required."
+msgstr "wordpress.org のプラグインスラッグが必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:205
+msgid "Plugin installation failed."
+msgstr "プラグインのインストールに失敗しました。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:256
+msgid "Plugin ZIP installation failed."
+msgstr "プラグイン ZIP のインストールに失敗しました。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:277
+#: includes/abilities/class-picot-mcp-ability-plugins.php:326
+#: includes/abilities/class-picot-mcp-ability-plugins.php:347
+#: includes/abilities/class-picot-mcp-ability-plugins.php:365
+#: includes/abilities/class-picot-mcp-ability-plugins.php:403
+msgid "plugin is required."
+msgstr "plugin が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-plugins.php:375
+msgid "No update package available for this plugin."
+msgstr "このプラグインの更新パッケージがありません。"
+
+#: includes/abilities/class-picot-mcp-ability-settings.php:68
+msgid "WordPress Settings"
+msgstr "WordPress 設定"
+
+#: includes/abilities/class-picot-mcp-ability-settings.php:69
+msgid "Get or update allow-listed site settings."
+msgstr "許可リスト内のサイト設定を取得・更新します。"
+
+#: includes/abilities/class-picot-mcp-ability-settings.php:153
+msgid "values is required."
+msgstr "values が必要です。"
+
+#. translators: %s: setting key
+#: includes/abilities/class-picot-mcp-ability-settings.php:167
+msgid "Setting \"%s\" cannot be changed via MCP."
+msgstr "設定「%s」はMCP経由で変更できません。"
+
+#. translators: %s: setting key
+#: includes/abilities/class-picot-mcp-ability-settings.php:177
+msgid "Setting \"%s\" is not in the allow list."
+msgstr "設定「%s」は許可リストにありません。"
+
+#: includes/abilities/class-picot-mcp-ability-taxonomy.php:26
+msgid "WordPress Taxonomy"
+msgstr "WordPress タクソノミー"
+
+#: includes/abilities/class-picot-mcp-ability-taxonomy.php:27
+msgid "Manage categories and tags."
+msgstr "カテゴリーとタグを管理します。"
+
+#: includes/abilities/class-picot-mcp-ability-taxonomy.php:140
+#: includes/abilities/class-picot-mcp-ability-taxonomy.php:222
+msgid "Term not found."
+msgstr "タームが見つかりません。"
+
+#: includes/abilities/class-picot-mcp-ability-taxonomy.php:155
+msgid "name is required."
+msgstr "name が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-taxonomy.php:185
+msgid "id is required."
+msgstr "id が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:26
+msgid "WordPress Themes"
+msgstr "WordPress テーマ"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:27
+msgid ""
+"List and manage themes. Install from wordpress.org, transfer ZIP packages "
+"via Base64 export/install."
+msgstr ""
+"テーマの一覧と管理。wordpress.org からのインストール、Base64 による ZIP パッ"
+"ケージのエクスポート／インストール。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:34
+msgid "Theme stylesheet / slug."
+msgstr "テーマの stylesheet / スラッグ。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:47
+msgid "Overwrite an existing theme package when using install_zip."
+msgstr "install_zip 時に既存のテーマパッケージを上書きする。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:128
+#: includes/abilities/class-picot-mcp-ability-themes.php:263
+#: includes/abilities/class-picot-mcp-ability-themes.php:302
+msgid "Theme not found."
+msgstr "テーマが見つかりません。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:145
+msgid "A wordpress.org theme slug is required."
+msgstr "wordpress.org のテーマスラッグが必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:176
+msgid "Theme installation failed."
+msgstr "テーマのインストールに失敗しました。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:226
+msgid "Theme ZIP installation failed."
+msgstr "テーマ ZIP のインストールに失敗しました。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:258
+#: includes/abilities/class-picot-mcp-ability-themes.php:320
+#: includes/abilities/class-picot-mcp-ability-themes.php:358
+msgid "stylesheet is required."
+msgstr "stylesheet が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:330
+msgid "No update package available for this theme."
+msgstr "このテーマの更新パッケージがありません。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:361
+msgid "Cannot delete the active theme."
+msgstr "有効なテーマは削除できません。"
+
+#: includes/abilities/class-picot-mcp-ability-themes.php:369
+msgid "Failed to delete theme."
+msgstr "テーマの削除に失敗しました。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:26
+msgid "WordPress Users"
+msgstr "WordPress ユーザー"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:27
+msgid "List, create, update, or delete users. Secrets are never returned."
+msgstr "ユーザーの一覧、作成、更新、削除。秘密情報は返しません。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:83
+msgid ""
+"User role changes, password changes, or delete operations require critical "
+"permissions."
+msgstr "ロール変更、パスワード変更、削除には critical 権限が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:90
+msgid "This API key is not allowed to perform critical user operations."
+msgstr "このAPIキーではユーザーのクリティカル操作は許可されていません。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:156
+#: includes/abilities/class-picot-mcp-ability-users.php:215
+#: includes/abilities/class-picot-mcp-ability-users.php:286
+#: includes/class-picot-mcp-permissions.php:225
+msgid "User not found."
+msgstr "ユーザーが見つかりません。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:171
+msgid "user_login and user_email are required."
+msgstr "user_login と user_email が必要です。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:174
+msgid "password is required (secrets are never returned)."
+msgstr "password が必要です（秘密情報は返しません）。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:179
+#: includes/abilities/class-picot-mcp-ability-users.php:251
+msgid "Cannot assign this role."
+msgstr "このロールは割り当てできません。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:289
+msgid "Cannot delete the authenticated user."
+msgstr "認証中のユーザーは削除できません。"
+
+#: includes/abilities/class-picot-mcp-ability-users.php:301
+msgid "Failed to delete user."
+msgstr "ユーザーの削除に失敗しました。"
+
+#: includes/class-picot-mcp-abilities.php:87
+msgid "WordPress operations exposed through Picot MCP."
+msgstr "Picot MCP 経由で公開する WordPress 操作。"
+
+#: includes/class-picot-mcp-abilities.php:120
+msgid "Operation to perform."
+msgstr "実行する操作。"
+
+#: includes/class-picot-mcp-abilities.php:146
+msgid "Whether the operation succeeded."
+msgstr "操作が成功したかどうか。"
+
+#: includes/class-picot-mcp-abilities.php:149
+msgid "Result payload."
+msgstr "結果データ。"
+
+#: includes/class-picot-mcp-abilities.php:153
+msgid "Error message when unsuccessful."
+msgstr "失敗時のエラーメッセージ。"
+
+#: includes/class-picot-mcp-abilities.php:157
+msgid "Stable error code when unsuccessful."
+msgstr "失敗時の安定エラーコード。"
+
+#: includes/class-picot-mcp-admin.php:58
+msgid "MCP"
+msgstr "MCP"
+
+#: includes/class-picot-mcp-admin.php:78 includes/class-picot-mcp-admin.php:539
+msgid "Settings"
+msgstr "設定"
+
+#: includes/class-picot-mcp-admin.php:97
+msgid ""
+"MCP API keys are sent with Bearer authentication. HTTPS is strongly "
+"recommended in production."
+msgstr ""
+"MCP APIキーはBearer認証で送信されます。本番ではHTTPSの利用を強く推奨します。"
+
+#: includes/class-picot-mcp-admin.php:133
+msgid "Failed to retrieve the API key."
+msgstr "キーの取得に失敗しました。"
+
+#: includes/class-picot-mcp-admin.php:146
+msgid "You do not have permission."
+msgstr "権限がありません。"
+
+#: includes/class-picot-mcp-admin.php:152
+msgid "Invalid request."
+msgstr "不正なリクエストです。"
+
+#: includes/class-picot-mcp-admin.php:165
+msgid "This key has no copyable data. Please issue a new key."
+msgstr "このキーはコピー用データがありません。再発行してください。"
+
+#: includes/class-picot-mcp-admin.php:435
+msgid "You do not have permission to access this page."
+msgstr "このページにアクセスする権限がありません。"
+
+#: includes/class-picot-mcp-admin.php:473
+#: includes/class-picot-mcp-usage-log.php:27
+msgid "Posts & pages"
+msgstr "記事・固定ページ"
+
+#: includes/class-picot-mcp-admin.php:474
+#: includes/class-picot-mcp-usage-log.php:28
+msgid "Categories & tags"
+msgstr "カテゴリー・タグ"
+
+#: includes/class-picot-mcp-admin.php:475
+#: includes/class-picot-mcp-usage-log.php:29
+msgid "Media"
+msgstr "メディア"
+
+#: includes/class-picot-mcp-admin.php:476
+#: includes/class-picot-mcp-usage-log.php:30
+msgid "Site settings"
+msgstr "サイト設定"
+
+#: includes/class-picot-mcp-admin.php:477
+#: includes/class-picot-mcp-usage-log.php:31
+msgid "Plugins"
+msgstr "プラグイン"
+
+#: includes/class-picot-mcp-admin.php:478
+#: includes/class-picot-mcp-usage-log.php:32
+msgid "Themes"
+msgstr "テーマ"
+
+#: includes/class-picot-mcp-admin.php:479
+#: includes/class-picot-mcp-usage-log.php:33
+msgid "Users"
+msgstr "ユーザー"
+
+#: includes/class-picot-mcp-admin.php:483
+msgid "Read"
+msgstr "読み取り"
+
+#: includes/class-picot-mcp-admin.php:484
+msgid "Create & edit"
+msgstr "作成・編集"
+
+#: includes/class-picot-mcp-admin.php:485
+msgid "Delete & critical"
+msgstr "削除・重要操作"
+
+#: includes/class-picot-mcp-admin.php:486
+msgid "Plugin/theme ZIP transfer"
+msgstr "プラグイン・テーマ ZIP 転送"
+
+#: includes/class-picot-mcp-admin.php:490
+msgid "Settings saved."
+msgstr "設定を保存しました。"
+
+#: includes/class-picot-mcp-admin.php:492
+msgid "API key settings updated."
+msgstr "APIキーの設定を更新しました。"
+
+#: includes/class-picot-mcp-admin.php:494
+msgid "API key deleted."
+msgstr "APIキーを削除しました。"
+
+#: includes/class-picot-mcp-admin.php:496
+msgid "Usage log cleared."
+msgstr "使用ログをクリアしました。"
+
+#: includes/class-picot-mcp-admin.php:498
+msgid "API key operation failed. Make sure the user is on the allow list."
+msgstr ""
+"APIキーの操作に失敗しました。ユーザーが許可リスト内か確認してください。"
+
+#: includes/class-picot-mcp-admin.php:506
+msgid "API key issued."
+msgstr "APIキーを発行しました。"
+
+#: includes/class-picot-mcp-admin.php:509
+#: includes/class-picot-mcp-admin.php:578
+#: includes/class-picot-mcp-admin.php:796
+msgid "Copy"
+msgstr "コピー"
+
+#: includes/class-picot-mcp-admin.php:509
+#: includes/class-picot-mcp-admin.php:510
+#: includes/class-picot-mcp-admin.php:578
+#: includes/class-picot-mcp-admin.php:796
+#: includes/class-picot-mcp-admin.php:797
+#: includes/class-picot-mcp-admin.php:838
+#: includes/class-picot-mcp-admin.php:839
+msgid "Copied"
+msgstr "コピーしました。"
+
+#: includes/class-picot-mcp-admin.php:510
+#: includes/class-picot-mcp-admin.php:797
+#: includes/class-picot-mcp-admin.php:839
+msgid "Copy all"
+msgstr "全てコピー"
+
+#: includes/class-picot-mcp-admin.php:512
+msgid "You can copy this key again later from the list while it stays masked."
+msgstr "このキーは一覧でもマスク表示のまま「キーをコピー」で再コピーできます。"
+
+#: includes/class-picot-mcp-admin.php:529
+msgid "API keys"
+msgstr "APIキー一覧"
+
+#: includes/class-picot-mcp-admin.php:536
+msgid "Create API key"
+msgstr "新規API作成"
+
+#: includes/class-picot-mcp-admin.php:542
+msgid "Logs"
+msgstr "ログ"
+
+#: includes/class-picot-mcp-admin.php:551
+msgid "MCP connection"
+msgstr "MCP接続"
+
+#: includes/class-picot-mcp-admin.php:554
+msgid "MCP server"
+msgstr "MCPサーバー"
+
+#: includes/class-picot-mcp-admin.php:558
+msgid "Enable MCP"
+msgstr "MCPを有効にする"
+
+#: includes/class-picot-mcp-admin.php:563
+msgid "Endpoint path"
+msgstr "エンドポイントパス"
+
+#: includes/class-picot-mcp-admin.php:570
+msgid ""
+"Lowercase letters, numbers, hyphens, and underscores only. Changing this "
+"disconnects existing clients. External domains are not allowed (site REST "
+"API path only)."
+msgstr ""
+"半角英数字・ハイフン・アンダースコアのみ。変更すると既存クライアントの接続が"
+"切れます。外部ドメインの指定はできません（サイトの REST API 配下のみ）。"
+
+#: includes/class-picot-mcp-admin.php:575
+msgid "MCP URL"
+msgstr "MCP URL"
+
+#: includes/class-picot-mcp-admin.php:585
+msgid "Site-wide features & operations (ceiling)"
+msgstr "サイト全体の機能・操作（上限）"
+
+#: includes/class-picot-mcp-admin.php:586
+msgid ""
+"Turning an item off disables it for every API key. Site settings override "
+"per-key settings. ZIP transfer (export/install) is separate from Delete & "
+"critical."
+msgstr ""
+"オフにすると、すべての API キーで使えなくなります。サイト設定がキー設定より優"
+"先されます。ZIP 転送（エクスポート／インストール）は「削除・重要操作」とは別"
+"です。"
+
+#: includes/class-picot-mcp-admin.php:589
+#: includes/class-picot-mcp-admin.php:659
+#: includes/class-picot-mcp-admin.php:867
+msgid "Features"
+msgstr "機能"
+
+#: includes/class-picot-mcp-admin.php:602
+#: includes/class-picot-mcp-admin.php:676
+#: includes/class-picot-mcp-admin.php:881
+msgid "Operations"
+msgstr "操作"
+
+#: includes/class-picot-mcp-admin.php:618
+msgid "Accounts allowed for keys"
+msgstr "キーに使えるアカウント"
+
+#: includes/class-picot-mcp-admin.php:619
+msgid ""
+"If none are selected, all users who can edit posts are eligible. Checked "
+"users become the only candidates."
+msgstr ""
+"未選択の場合は「投稿編集可」のユーザーすべてが候補になります。チェックした"
+"ユーザーのみに絞れます。"
+
+#: includes/class-picot-mcp-admin.php:630
+msgid "Save settings"
+msgstr "設定を保存"
+
+#: includes/class-picot-mcp-admin.php:637
+msgid ""
+"Choose features and operations for this key. Items disabled on the Settings "
+"tab cannot be used (site ceiling)."
+msgstr ""
+"このキー固有の機能・操作を選べます。「設定」タブでオフになっている項目はサイ"
+"ト上限のため使えません。"
+
+#: includes/class-picot-mcp-admin.php:640
+#: includes/class-picot-mcp-admin.php:763
+#: includes/class-picot-mcp-admin.php:846
+msgid "Label"
+msgstr "ラベル"
+
+#: includes/class-picot-mcp-admin.php:642
+msgid "e.g. Cursor"
+msgstr "例: Cursor用"
+
+#: includes/class-picot-mcp-admin.php:646
+#: includes/class-picot-mcp-admin.php:765
+#: includes/class-picot-mcp-admin.php:852
+msgid "Acting user"
+msgstr "実行ユーザー"
+
+#: includes/class-picot-mcp-admin.php:649
+msgid "Select a user"
+msgstr "選択してください"
+
+#: includes/class-picot-mcp-admin.php:668
+#: includes/class-picot-mcp-admin.php:685
+msgid "(disabled in site settings)"
+msgstr "（サイト設定で無効）"
+
+#: includes/class-picot-mcp-admin.php:694
+msgid "Issue API key"
+msgstr "APIキーを発行"
+
+#. translators: %d: max number of log entries kept
+#: includes/class-picot-mcp-admin.php:709
+msgid ""
+"Recent MCP tool usage (up to %d entries). Shows who ran which operation; "
+"change details are not stored."
+msgstr ""
+"直近の MCP ツール使用状況（最大 %d 件）。誰がどの操作を行ったかを表示します。"
+"変更内容の詳細は保存しません。"
+
+#: includes/class-picot-mcp-admin.php:716
+msgid "Clear all usage log entries?"
+msgstr "使用ログをすべてクリアしますか？"
+
+#: includes/class-picot-mcp-admin.php:717
+msgid "Clear log"
+msgstr "ログをクリア"
+
+#: includes/class-picot-mcp-admin.php:723
+msgid "Time"
+msgstr "日時"
+
+#: includes/class-picot-mcp-admin.php:724
+msgid "User"
+msgstr "ユーザー"
+
+#: includes/class-picot-mcp-admin.php:725
+msgid "API key"
+msgstr "APIキー"
+
+#: includes/class-picot-mcp-admin.php:726
+msgid "Feature"
+msgstr "機能"
+
+#: includes/class-picot-mcp-admin.php:727
+msgid "Action"
+msgstr "操作"
+
+#: includes/class-picot-mcp-admin.php:728
+msgid "Result"
+msgstr "結果"
+
+#: includes/class-picot-mcp-admin.php:746
+msgid "OK"
+msgstr "成功"
+
+#: includes/class-picot-mcp-admin.php:746
+msgid "Failed"
+msgstr "失敗"
+
+#: includes/class-picot-mcp-admin.php:752
+msgid "No usage has been recorded yet."
+msgstr "まだ使用記録はありません。"
+
+#: includes/class-picot-mcp-admin.php:758
+msgid ""
+"Each key has an acting user and its own features/operations. Effective "
+"access is site settings ∩ key settings ∩ user capabilities."
+msgstr ""
+"各キーは実行ユーザーと、キー固有の機能・操作を後から変更できます。実際の権限"
+"は「サイト全体設定 ∩ キー設定 ∩ ユーザーの Capability」です。"
+
+#: includes/class-picot-mcp-admin.php:764
+msgid "Key"
+msgstr "キー"
+
+#: includes/class-picot-mcp-admin.php:766
+msgid "Created / last used"
+msgstr "作成 / 最終使用"
+
+#: includes/class-picot-mcp-admin.php:774
+msgid "(deleted)"
+msgstr "（削除済み）"
+
+#: includes/class-picot-mcp-admin.php:791
+msgid "(no label)"
+msgstr "（ラベルなし）"
+
+#: includes/class-picot-mcp-admin.php:806
+msgid "Edit"
+msgstr "編集"
+
+#: includes/class-picot-mcp-admin.php:831
+msgid "Edit API key"
+msgstr "APIキーを編集"
+
+#: includes/class-picot-mcp-admin.php:832
+msgid "Close"
+msgstr "閉じる"
+
+#: includes/class-picot-mcp-admin.php:838
+msgid "Copy key"
+msgstr "キーをコピー"
+
+#: includes/class-picot-mcp-admin.php:841
+msgid "No copyable data. Please issue a new key."
+msgstr "コピー用データがありません。再発行してください。"
+
+#: includes/class-picot-mcp-admin.php:898
+msgid "Save"
+msgstr "保存"
+
+#: includes/class-picot-mcp-admin.php:900
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: includes/class-picot-mcp-admin.php:901
+msgid "Delete this API key? This cannot be undone."
+msgstr "このAPIキーを削除しますか？元に戻せません。"
+
+#: includes/class-picot-mcp-admin.php:902
+msgid "Delete"
+msgstr "削除"
+
+#: includes/class-picot-mcp-admin.php:909
+msgid "No API keys have been issued yet."
+msgstr "APIキーはまだ発行されていません。"
+
+#: includes/class-picot-mcp-admin.php:910
+msgid "Create an API key"
+msgstr "新規API作成へ"
+
+#: includes/class-picot-mcp-api-key.php:31
+msgid "A valid user is required to issue an API key."
+msgstr "APIキー発行には有効なユーザーが必要です。"
+
+#: includes/class-picot-mcp-api-key.php:35
+#: includes/class-picot-mcp-api-key.php:120
+msgid "This user is not allowed for MCP API keys."
+msgstr "このユーザーはMCP APIキーに使えません。"
+
+#: includes/class-picot-mcp-api-key.php:41
+msgid "Failed to generate a secure API key."
+msgstr "安全なAPIキーの生成に失敗しました。"
+
+#: includes/class-picot-mcp-api-key.php:63
+msgid "Failed to encrypt the API key for storage."
+msgstr "保存用のAPIキー暗号化に失敗しました。"
+
+#: includes/class-picot-mcp-api-key.php:83
+msgid "Failed to store the API key."
+msgstr "APIキーの保存に失敗しました。"
+
+#: includes/class-picot-mcp-api-key.php:117
+msgid "A valid user is required."
+msgstr "有効なユーザーが必要です。"
+
+#: includes/class-picot-mcp-api-key.php:137
+msgid "API key not found."
+msgstr "APIキーが見つかりません。"
+
+#: includes/class-picot-mcp-api-key.php:141
+msgid "Failed to save the API key."
+msgstr "APIキーの保存に失敗しました。"
+
+#: includes/class-picot-mcp-api-key.php:327
+#: includes/class-picot-mcp-api-key.php:348
+msgid "Invalid API key."
+msgstr "APIキーが無効です。"
+
+#: includes/class-picot-mcp-api-key.php:332
+msgid "No API key is configured."
+msgstr "APIキーが設定されていません。"
+
+#: includes/class-picot-mcp-api-key.php:353
+msgid "API key owner no longer exists."
+msgstr "APIキーの所有者ユーザーが存在しません。"
+
+#: includes/class-picot-mcp-api-key.php:357
+msgid "API key owner is no longer allowed."
+msgstr "APIキーの所有者は許可されていません。"
+
+#: includes/class-picot-mcp-auth.php:151
+#: includes/class-picot-mcp-permissions.php:114
+msgid "MCP server is disabled."
+msgstr "MCPサーバーは無効です。"
+
+#: includes/class-picot-mcp-auth.php:161
+msgid "Authorization Bearer API key is required."
+msgstr "Authorization Bearer APIキーが必要です。"
+
+#: includes/class-picot-mcp-auth.php:171 includes/class-picot-mcp-auth.php:186
+msgid "Authentication failed."
+msgstr "認証に失敗しました。"
+
+#: includes/class-picot-mcp-auth.php:228 includes/class-picot-mcp-auth.php:238
+msgid "Origin is not allowed."
+msgstr "Origin は許可されていません。"
+
+#. translators: %s: feature name
+#: includes/class-picot-mcp-permissions.php:122
+msgid "The \"%s\" feature is disabled in MCP settings."
+msgstr "「%s」機能はMCP設定で無効です。"
+
+#. translators: %s: feature name
+#: includes/class-picot-mcp-permissions.php:134
+msgid "The \"%s\" feature is disabled for this API key."
+msgstr "「%s」機能はこのAPIキーでは無効です。"
+
+#. translators: %s: action name
+#: includes/class-picot-mcp-permissions.php:146
+msgid "The \"%s\" action is disabled by MCP operation settings."
+msgstr "「%s」操作はMCP操作設定で無効です。"
+
+#. translators: %s: action name
+#: includes/class-picot-mcp-permissions.php:157
+msgid "The \"%s\" action is disabled for this API key."
+msgstr "「%s」操作はこのAPIキーでは無効です。"
+
+#. translators: %s: capability name
+#: includes/class-picot-mcp-permissions.php:206
+msgid "WordPress capability \"%s\" is required for this item."
+msgstr "この項目には WordPress 権限「%s」が必要です。"
+
+#. translators: %s: capability name
+#: includes/class-picot-mcp-permissions.php:240
+msgid "WordPress capability \"%s\" is required for this user."
+msgstr "このユーザーには WordPress 権限「%s」が必要です。"
+
+#: includes/class-picot-mcp-server.php:92
+msgid "Picot MCP server for WordPress content and site operations."
+msgstr "WordPress のコンテンツとサイト操作向け Picot MCP サーバーです。"
+
+#: includes/class-picot-mcp-settings.php:198
+#: includes/class-picot-mcp-settings.php:216
+msgid "Default"
+msgstr "デフォルト"
+
+#: includes/class-picot-mcp-usage-log.php:54
+msgid "(none)"
+msgstr "（なし）"
+
+#: includes/class-picot-mcp-util.php:25
+msgid "Download URL is missing."
+msgstr "ダウンロードURLがありません。"
+
+#: includes/class-picot-mcp-util.php:30
+msgid "Only HTTPS wordpress.org downloads are allowed."
+msgstr "HTTPS の wordpress.org ダウンロードのみ許可されています。"
+
+#: includes/class-picot-mcp-util.php:49
+msgid "Download host is not allowed."
+msgstr "ダウンロードホストは許可されていません。"
+
+#: includes/class-picot-mcp-util.php:83
+msgid "A .zip filename is required."
+msgstr ".zip のファイル名が必要です。"
+
+#: includes/class-picot-mcp-util.php:88
+msgid "base64_data is required."
+msgstr "base64_data が必要です。"
+
+#: includes/class-picot-mcp-util.php:101
+msgid "ZIP exceeds the maximum upload size."
+msgstr "ZIP が最大アップロードサイズを超えています。"
+
+#: includes/class-picot-mcp-util.php:106
+msgid "File is not a valid ZIP archive."
+msgstr "有効な ZIP アーカイブではありません。"
+
+#: includes/class-picot-mcp-util.php:141
+msgid "ZIP support (ZipArchive) is not available on this server."
+msgstr "このサーバーでは ZIP サポート（ZipArchive）が利用できません。"
+
+#: includes/class-picot-mcp-util.php:147 includes/class-picot-mcp-util.php:332
+msgid "Package path not found."
+msgstr "パッケージのパスが見つかりません。"
+
+#: includes/class-picot-mcp-util.php:153
+msgid "Invalid package name."
+msgstr "パッケージ名が無効です。"
+
+#: includes/class-picot-mcp-util.php:170 includes/class-picot-mcp-util.php:207
+#: includes/class-picot-mcp-util.php:251
+msgid "Package exceeds the maximum ZIP size."
+msgstr "パッケージが最大 ZIP サイズを超えています。"
+
+#: includes/class-picot-mcp-util.php:188
+msgid "Could not create ZIP archive."
+msgstr "ZIP アーカイブを作成できませんでした。"
+
+#: includes/class-picot-mcp-util.php:204
+msgid "Could not read ZIP archive."
+msgstr "ZIP アーカイブを読み取れませんでした。"
+
+#: includes/class-picot-mcp-util.php:237 includes/class-picot-mcp-util.php:280
+msgid "Could not read package directory."
+msgstr "パッケージディレクトリを読み取れませんでした。"
+
+#: includes/class-picot-mcp-util.php:269 includes/class-picot-mcp-util.php:297
+msgid "Could not add file to ZIP archive."
+msgstr "ZIP アーカイブにファイルを追加できませんでした。"
+
+#: includes/class-picot-mcp-util.php:337
+msgid "Package path is not allowed."
+msgstr "パッケージのパスは許可されていません。"
+
+#: picot-mcp.php:38
+msgid ""
+"Picot MCP requires Composer dependencies. Run \"composer install\" in the "
+"plugin directory."
+msgstr ""
+"Picot MCP には Composer 依存関係が必要です。プラグインディレクトリで "
+"composer install を実行してください。"
+
+#: picot-mcp.php:83
+msgid "Picot MCP requires WordPress 6.9 or later (Abilities API)."
+msgstr "Picot MCP には WordPress 6.9 以降（Abilities API）が必要です。"
+
+#: picot-mcp.php:97
+msgid ""
+"Picot MCP could not load the WordPress MCP Adapter. Re-run composer install."
+msgstr ""
+"WordPress MCP Adapter を読み込めませんでした。composer install を再実行してく"
+"ださい。"
+
+#~ msgid "WordPress MCP"
+#~ msgstr "WordPress MCP"
+
+#~ msgid "List and manage plugins. Install only from wordpress.org by slug."
+#~ msgstr ""
+#~ "プラグインの一覧と管理。インストールは wordpress.org のスラッグのみ。"
+
+#~ msgid ""
+#~ "List and manage themes. Install only from wordpress.org by stylesheet."
+#~ msgstr ""
+#~ "テーマの一覧と管理。インストールは wordpress.org の stylesheet のみ。"
+
+#~ msgid ""
+#~ "Turning an item off disables it for every API key. Site settings override "
+#~ "per-key settings."
+#~ msgstr ""
+#~ "ここをオフにすると、すべてのAPIキーでその機能・操作が使えなくなります。"
+#~ "キーごとの設定より優先されます。"
+
+#~ msgid "Delete all API keys?"
+#~ msgstr "すべてのAPIキーを削除しますか？"
+
+#~ msgid "Delete all API keys"
+#~ msgstr "すべてのAPIキーを削除"
+
+#~ msgid ""
+#~ "List and manage plugins. Install from wordpress.org by slug, or upload a "
+#~ "ZIP via Base64."
+#~ msgstr ""
+#~ "プラグインの一覧と管理。wordpress.org のスラッグ、または Base64 の ZIP で"
+#~ "インストールできます。"
+
+#~ msgid ""
+#~ "List and manage themes. Install from wordpress.org by stylesheet, or "
+#~ "upload a ZIP via Base64."
+#~ msgstr ""
+#~ "テーマの一覧と管理。wordpress.org のスタイルシート、または Base64 の ZIP "
+#~ "でインストールできます。"
+
+#~ msgid "ZIP filename for install_zip (must end with .zip)."
+#~ msgstr "install_zip 用の ZIP ファイル名（.zip で終わる必要があります）。"
+
+#~ msgid "Could not prepare temporary ZIP file."
+#~ msgstr "一時 ZIP ファイルを準備できませんでした。"
+
+#~ msgid "Plugin/theme ZIP install"
+#~ msgstr "プラグイン・テーマ ZIP インストール"
+
+#~ msgid ""
+#~ "Turning an item off disables it for every API key. Site settings override "
+#~ "per-key settings. ZIP install is separate from Delete & critical."
+#~ msgstr ""
+#~ "オフにすると、すべての API キーで使えなくなります。サイト設定がキー設定よ"
+#~ "り優先されます。ZIP インストールは「削除・重要操作」とは別です。"
