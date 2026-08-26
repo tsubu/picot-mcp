@@ -43,7 +43,7 @@ class Picot_Mcp_Admin {
 		add_action( 'admin_init', array( $this, 'handle_actions' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', array( $this, 'maybe_https_notice' ) );
-		add_action( 'wp_ajax_picot_mcp_reveal_key', array( $this, 'ajax_reveal_key' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_adapter_notice' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( PICOT_MCP_FILE ), array( $this, 'action_links' ) );
 	}
 
@@ -99,6 +99,27 @@ class Picot_Mcp_Admin {
 	}
 
 	/**
+	 * Notice when a standalone MCP Adapter plugin is also active.
+	 *
+	 * @return void
+	 */
+	public function maybe_adapter_notice() {
+		if ( ! Picot_Mcp_Capabilities::current_user_can_manage() ) {
+			return;
+		}
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'settings_page_picot-mcp' !== $screen->id ) {
+			return;
+		}
+		if ( ! Picot_Mcp_Runtime::is_standalone_adapter_active() ) {
+			return;
+		}
+		echo '<div class="notice notice-info"><p>';
+		echo esc_html__( 'A standalone WordPress MCP Adapter plugin is active. Picot MCP bundles its own Adapter as the runtime and disables the Adapter default server. Prefer keeping only one product configuring MCP endpoints to avoid confusion.', 'picot-mcp' );
+		echo '</p></div>';
+	}
+
+	/**
 	 * Enqueue admin copy helper.
 	 *
 	 * @param string $hook Hook suffix.
@@ -126,46 +147,14 @@ class Picot_Mcp_Admin {
 			'picotMcpAdmin',
 			array(
 				'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'picot_mcp_reveal_key' ),
 				'siteName' => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
 				'mcpUrl'   => Picot_Mcp_Server::endpoint_url(),
 				'i18n'     => array(
-					'copyFailed' => __( 'Failed to retrieve the API key.', 'picot-mcp' ),
+					'copyFailed'      => __( 'Failed to copy.', 'picot-mcp' ),
+					'keyNotRevealed'  => __( 'API keys cannot be shown again after issue. Create a new key if needed.', 'picot-mcp' ),
 				),
 			)
 		);
-	}
-
-	/**
-	 * AJAX: reveal plaintext API key for clipboard copy (admins only).
-	 *
-	 * @return void
-	 */
-	public function ajax_reveal_key() {
-		if ( ! Picot_Mcp_Capabilities::current_user_can_manage() ) {
-			wp_send_json_error( array( 'message' => __( 'You do not have permission.', 'picot-mcp' ) ), 403 );
-		}
-		check_ajax_referer( 'picot_mcp_reveal_key', 'nonce' );
-
-		$token_id = isset( $_POST['token_id'] ) ? sanitize_text_field( wp_unslash( $_POST['token_id'] ) ) : '';
-		if ( '' === $token_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid request.', 'picot-mcp' ) ), 400 );
-		}
-
-		$plaintext = '';
-		foreach ( Picot_Mcp_Settings::instance()->get_tokens() as $token ) {
-			if ( empty( $token['token_id'] ) || $token['token_id'] !== $token_id ) {
-				continue;
-			}
-			$plaintext = Picot_Mcp_Api_Key::reveal_plaintext( $token );
-			break;
-		}
-
-		if ( '' === $plaintext ) {
-			wp_send_json_error( array( 'message' => __( 'This key has no copyable data. Please issue a new key.', 'picot-mcp' ) ), 404 );
-		}
-
-		wp_send_json_success( array( 'key' => $plaintext ) );
 	}
 
 	/**
@@ -216,7 +205,9 @@ class Picot_Mcp_Admin {
 				foreach ( $ops as $op ) {
 					$opers[ $op ] = ! empty( $op_src[ $op ] ) && $settings->is_operation_allowed( $op );
 				}
-				$result = Picot_Mcp_Api_Key::generate( $user_id, $label, $perms, $opers );
+				$expires_days = isset( $_POST['picot_mcp_key_expires_days'] ) ? absint( wp_unslash( $_POST['picot_mcp_key_expires_days'] ) ) : 0;
+				$expires_at   = Picot_Mcp_Api_Key::expires_at_from_days( $expires_days );
+				$result       = Picot_Mcp_Api_Key::generate( $user_id, $label, $perms, $opers, $expires_at );
 				if ( is_wp_error( $result ) ) {
 					$query['picot_mcp_notice'] = 'key_error';
 					$query['picot_mcp_tab']    = 'create';
@@ -279,6 +270,19 @@ class Picot_Mcp_Admin {
 					}
 					$opers[ $op ] = ! empty( $op_src[ $op ] );
 				}
+				$expires_at = is_array( $existing_token ) && isset( $existing_token['expires_at'] )
+					? $existing_token['expires_at']
+					: null;
+				if ( ! empty( $_POST['picot_mcp_edit_expires_never'][ $token_id ] ) ) {
+					$expires_at = null;
+				} else {
+					$expires_days = isset( $_POST['picot_mcp_edit_expires_days'][ $token_id ] )
+						? absint( wp_unslash( $_POST['picot_mcp_edit_expires_days'][ $token_id ] ) )
+						: 0;
+					if ( $expires_days > 0 ) {
+						$expires_at = Picot_Mcp_Api_Key::expires_at_from_days( $expires_days );
+					}
+				}
 				$result = Picot_Mcp_Api_Key::update(
 					$token_id,
 					array(
@@ -286,6 +290,7 @@ class Picot_Mcp_Admin {
 						'user_id'     => $user_id,
 						'permissions' => $perms,
 						'operations'  => $opers,
+						'expires_at'  => $expires_at,
 					)
 				);
 				$query['picot_mcp_notice'] = is_wp_error( $result ) ? 'key_error' : 'key_updated';
@@ -383,6 +388,16 @@ class Picot_Mcp_Admin {
 				}
 			}
 			$settings['allowed_user_ids'] = $allowed;
+
+			$settings['log_retention'] = isset( $_POST['picot_mcp_log_retention'] )
+				? absint( wp_unslash( $_POST['picot_mcp_log_retention'] ) )
+				: $settings['log_retention'];
+			$settings['rate_limit_per_minute'] = isset( $_POST['picot_mcp_rate_limit'] )
+				? absint( wp_unslash( $_POST['picot_mcp_rate_limit'] ) )
+				: $settings['rate_limit_per_minute'];
+			$settings['observability'] = isset( $_POST['picot_mcp_observability'] )
+				? sanitize_key( wp_unslash( $_POST['picot_mcp_observability'] ) )
+				: $settings['observability'];
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
@@ -509,7 +524,7 @@ class Picot_Mcp_Admin {
 						<button type="button" class="button button-primary picot-mcp-copy" data-copy-target="picot-mcp-issued-key" data-label="<?php echo esc_attr__( 'Copy', 'picot-mcp' ); ?>" data-copied-label="<?php echo esc_attr__( 'Copied', 'picot-mcp' ); ?>"><?php echo esc_html__( 'Copy', 'picot-mcp' ); ?></button>
 						<button type="button" class="button picot-mcp-copy" data-copy-bundle="1" data-copy-target="picot-mcp-issued-key" data-key-label="<?php echo esc_attr( $issued_label ); ?>" data-label="<?php echo esc_attr__( 'Copy all', 'picot-mcp' ); ?>" data-copied-label="<?php echo esc_attr__( 'Copied', 'picot-mcp' ); ?>"><?php echo esc_html__( 'Copy all', 'picot-mcp' ); ?></button>
 					</p>
-					<p class="description"><?php echo esc_html__( 'You can copy this key again later from the list while it stays masked.', 'picot-mcp' ); ?></p>
+					<p class="description"><?php echo esc_html__( 'Copy this key now. It is shown only once and cannot be retrieved later (hash-only storage).', 'picot-mcp' ); ?></p>
 				</div>
 			<?php endif; ?>
 
@@ -549,6 +564,17 @@ class Picot_Mcp_Admin {
 						<input type="hidden" name="picot_mcp_tab" value="settings" />
 
 						<h2><?php echo esc_html__( 'MCP connection', 'picot-mcp' ); ?></h2>
+						<div class="notice notice-info inline" style="margin:0 0 1em;">
+							<p>
+								<?php
+								printf(
+									/* translators: %s: Adapter version */
+									esc_html__( 'Runtime: WordPress MCP Adapter %s (bundled). Picot provides API keys, scopes, logging, and the admin UI.', 'picot-mcp' ),
+									esc_html( Picot_Mcp_Runtime::bundled_adapter_version() )
+								);
+								?>
+							</p>
+						</div>
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php echo esc_html__( 'MCP server', 'picot-mcp' ); ?></th>
@@ -557,6 +583,7 @@ class Picot_Mcp_Admin {
 										<input type="checkbox" name="picot_mcp_enabled" value="1" <?php checked( ! empty( $settings['enabled'] ) ); ?> />
 										<?php echo esc_html__( 'Enable MCP', 'picot-mcp' ); ?>
 									</label>
+									<p class="description"><?php echo esc_html__( 'New installs start with MCP disabled. Enable only after reviewing features and issuing a scoped API key.', 'picot-mcp' ); ?></p>
 								</td>
 							</tr>
 							<tr>
@@ -584,6 +611,17 @@ class Picot_Mcp_Admin {
 
 						<h2><?php echo esc_html__( 'Site-wide features & operations (ceiling)', 'picot-mcp' ); ?></h2>
 						<p class="description"><?php echo esc_html__( 'Turning an item off disables it for every API key. Site settings override per-key settings. ZIP transfer (export/install) is separate from Delete & critical.', 'picot-mcp' ); ?></p>
+						<div class="notice notice-warning inline" style="margin:0 0 1em;">
+							<p>
+								<?php
+								printf(
+									/* translators: %s: max ZIP size label */
+									esc_html__( 'ZIP transfer can install arbitrary code or exfiltrate plugin/theme sources (max %s). Keep it off unless you trust every API key that has this scope.', 'picot-mcp' ),
+									esc_html( Picot_Mcp_Util::max_zip_upload_label() )
+								);
+								?>
+							</p>
+						</div>
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php echo esc_html__( 'Features', 'picot-mcp' ); ?></th>
@@ -606,9 +644,42 @@ class Picot_Mcp_Admin {
 											<label style="display:block;margin-bottom:4px;">
 												<input type="checkbox" name="picot_mcp_operation[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( ! empty( $settings['operations'][ $key ] ) ); ?> />
 												<?php echo esc_html( $label ); ?>
+												<?php if ( 'zip_install' === $key ) : ?>
+													<span class="description"> — <?php echo esc_html__( 'High risk', 'picot-mcp' ); ?></span>
+												<?php endif; ?>
 											</label>
 										<?php endforeach; ?>
 									</fieldset>
+								</td>
+							</tr>
+						</table>
+
+						<hr />
+
+						<h2><?php echo esc_html__( 'Security & logging', 'picot-mcp' ); ?></h2>
+						<table class="form-table" role="presentation">
+							<tr>
+								<th scope="row"><label for="picot_mcp_log_retention"><?php echo esc_html__( 'Log retention', 'picot-mcp' ); ?></label></th>
+								<td>
+									<input type="number" min="10" max="500" name="picot_mcp_log_retention" id="picot_mcp_log_retention" value="<?php echo esc_attr( (string) (int) $settings['log_retention'] ); ?>" class="small-text" />
+									<p class="description"><?php echo esc_html__( 'Number of recent audit log entries to keep (10–500).', 'picot-mcp' ); ?></p>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><label for="picot_mcp_rate_limit"><?php echo esc_html__( 'Rate limit', 'picot-mcp' ); ?></label></th>
+								<td>
+									<input type="number" min="0" max="10000" name="picot_mcp_rate_limit" id="picot_mcp_rate_limit" value="<?php echo esc_attr( (string) (int) $settings['rate_limit_per_minute'] ); ?>" class="small-text" />
+									<p class="description"><?php echo esc_html__( 'Max authenticated MCP requests per API key per minute. 0 disables the limit.', 'picot-mcp' ); ?></p>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><label for="picot_mcp_observability"><?php echo esc_html__( 'Adapter observability', 'picot-mcp' ); ?></label></th>
+								<td>
+									<select name="picot_mcp_observability" id="picot_mcp_observability">
+										<option value="null" <?php selected( $settings['observability'], 'null' ); ?>><?php echo esc_html__( 'Off (null handler)', 'picot-mcp' ); ?></option>
+										<option value="error_log" <?php selected( $settings['observability'], 'error_log' ); ?>><?php echo esc_html__( 'PHP error_log', 'picot-mcp' ); ?></option>
+									</select>
+									<p class="description"><?php echo esc_html__( 'Optional MCP Adapter observability handler. Usage audit remains in the Logs tab.', 'picot-mcp' ); ?></p>
 								</td>
 							</tr>
 						</table>
@@ -634,7 +705,7 @@ class Picot_Mcp_Admin {
 				<?php elseif ( 'create' === $keys_tab ) : ?>
 					<div class="picot-mcp-tab-panel" id="picot-mcp-tab-create" style="padding-top:1em;">
 						<input type="hidden" name="picot_mcp_tab" value="create" />
-						<p class="description"><?php echo esc_html__( 'Choose features and operations for this key. Items disabled on the Settings tab cannot be used (site ceiling).', 'picot-mcp' ); ?></p>
+						<p class="description"><?php echo esc_html__( 'Choose features and operations for this key. Items disabled on the Settings tab cannot be used (site ceiling). The plaintext key is shown only once after issue.', 'picot-mcp' ); ?></p>
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php echo esc_html__( 'Label', 'picot-mcp' ); ?></th>
@@ -656,13 +727,24 @@ class Picot_Mcp_Admin {
 								</td>
 							</tr>
 							<tr>
+								<th scope="row"><?php echo esc_html__( 'Expires in', 'picot-mcp' ); ?></th>
+								<td>
+									<input type="number" min="0" max="3650" name="picot_mcp_key_expires_days" value="0" class="small-text" />
+									<?php echo esc_html__( 'days (0 = never)', 'picot-mcp' ); ?>
+								</td>
+							</tr>
+							<tr>
 								<th scope="row"><?php echo esc_html__( 'Features', 'picot-mcp' ); ?></th>
 								<td>
 									<fieldset>
-										<?php foreach ( $features as $fkey => $flabel ) : ?>
-											<?php $site_on = ! empty( $settings['permissions'][ $fkey ] ); ?>
+										<?php
+										$create_feat_defaults = array( 'content', 'taxonomy', 'media' );
+										foreach ( $features as $fkey => $flabel ) :
+											$site_on   = ! empty( $settings['permissions'][ $fkey ] );
+											$pre_check = $site_on && in_array( $fkey, $create_feat_defaults, true );
+											?>
 											<label style="display:inline-block;margin:0 12px 4px 0;<?php echo $site_on ? '' : 'opacity:0.55;'; ?>">
-												<input type="checkbox" name="picot_mcp_new_feature[<?php echo esc_attr( $fkey ); ?>]" value="1" <?php checked( $site_on ); ?> <?php disabled( ! $site_on ); ?> />
+												<input type="checkbox" name="picot_mcp_new_feature[<?php echo esc_attr( $fkey ); ?>]" value="1" <?php checked( $pre_check ); ?> <?php disabled( ! $site_on ); ?> />
 												<?php echo esc_html( $flabel ); ?>
 												<?php if ( ! $site_on ) : ?>
 													<span class="description"><?php echo esc_html__( '(disabled in site settings)', 'picot-mcp' ); ?></span>
@@ -677,9 +759,12 @@ class Picot_Mcp_Admin {
 								<td>
 									<fieldset>
 										<?php foreach ( $operations as $okey => $olabel ) : ?>
-											<?php $site_on = ! empty( $settings['operations'][ $okey ] ); ?>
+											<?php
+											$site_on   = ! empty( $settings['operations'][ $okey ] );
+											$pre_check = $site_on && ( 'read' === $okey );
+											?>
 											<label style="display:inline-block;margin:0 12px 4px 0;<?php echo $site_on ? '' : 'opacity:0.55;'; ?>">
-												<input type="checkbox" name="picot_mcp_new_operation[<?php echo esc_attr( $okey ); ?>]" value="1" <?php checked( $site_on ); ?> <?php disabled( ! $site_on ); ?> />
+												<input type="checkbox" name="picot_mcp_new_operation[<?php echo esc_attr( $okey ); ?>]" value="1" <?php checked( $pre_check ); ?> <?php disabled( ! $site_on ); ?> />
 												<?php echo esc_html( $olabel ); ?>
 												<?php if ( ! $site_on ) : ?>
 													<span class="description"><?php echo esc_html__( '(disabled in site settings)', 'picot-mcp' ); ?></span>
@@ -706,8 +791,8 @@ class Picot_Mcp_Admin {
 							<?php
 							printf(
 								/* translators: %d: max number of log entries kept */
-								esc_html__( 'Recent MCP tool usage (up to %d entries). Shows who ran which operation; change details are not stored.', 'picot-mcp' ),
-								(int) Picot_Mcp_Usage_Log::MAX
+								esc_html__( 'Recent MCP tool usage (up to %d entries). Includes user, key id, IP, and failure codes. Request payloads are not stored.', 'picot-mcp' ),
+								(int) Picot_Mcp_Usage_Log::max_entries()
 							);
 							?>
 						</p>
@@ -717,12 +802,13 @@ class Picot_Mcp_Admin {
 									<?php echo esc_html__( 'Clear log', 'picot-mcp' ); ?>
 								</button>
 							</p>
-							<table class="widefat striped" style="max-width:960px;">
+							<table class="widefat striped" style="max-width:1100px;">
 								<thead>
 									<tr>
 										<th><?php echo esc_html__( 'Time', 'picot-mcp' ); ?></th>
 										<th><?php echo esc_html__( 'User', 'picot-mcp' ); ?></th>
 										<th><?php echo esc_html__( 'API key', 'picot-mcp' ); ?></th>
+										<th><?php echo esc_html__( 'IP', 'picot-mcp' ); ?></th>
 										<th><?php echo esc_html__( 'Feature', 'picot-mcp' ); ?></th>
 										<th><?php echo esc_html__( 'Action', 'picot-mcp' ); ?></th>
 										<th><?php echo esc_html__( 'Result', 'picot-mcp' ); ?></th>
@@ -736,14 +822,30 @@ class Picot_Mcp_Admin {
 										$feat_label = isset( $feature_labels[ $feat ] ) ? $feature_labels[ $feat ] : $feat;
 										$key_label  = isset( $entry['key'] ) && '' !== (string) $entry['key'] ? (string) $entry['key'] : '—';
 										$ok         = ! isset( $entry['success'] ) || ! empty( $entry['success'] );
+										$ip         = isset( $entry['ip'] ) && '' !== (string) $entry['ip'] ? (string) $entry['ip'] : '—';
+										$result_lbl = $ok ? __( 'OK', 'picot-mcp' ) : __( 'Failed', 'picot-mcp' );
+										if ( ! $ok && ! empty( $entry['code'] ) ) {
+											$result_lbl .= ' (' . (string) $entry['code'] . ')';
+										}
 										?>
 										<tr>
 											<td><?php echo esc_html( $when ? wp_date( 'Y-m-d H:i:s', $when ) : '—' ); ?></td>
 											<td><?php echo esc_html( isset( $entry['user'] ) ? (string) $entry['user'] : '—' ); ?></td>
-											<td><?php echo esc_html( $key_label ); ?></td>
+											<td>
+												<?php echo esc_html( $key_label ); ?>
+												<?php if ( ! empty( $entry['token_id'] ) ) : ?>
+													<br /><code class="description"><?php echo esc_html( substr( (string) $entry['token_id'], 0, 8 ) ); ?>…</code>
+												<?php endif; ?>
+											</td>
+											<td><code><?php echo esc_html( $ip ); ?></code></td>
 											<td><?php echo esc_html( $feat_label ); ?></td>
 											<td><code><?php echo esc_html( isset( $entry['action'] ) ? (string) $entry['action'] : '—' ); ?></code></td>
-											<td><?php echo esc_html( $ok ? __( 'OK', 'picot-mcp' ) : __( 'Failed', 'picot-mcp' ) ); ?></td>
+											<td>
+												<?php echo esc_html( $result_lbl ); ?>
+												<?php if ( ! $ok && ! empty( $entry['error'] ) ) : ?>
+													<br /><span class="description"><?php echo esc_html( (string) $entry['error'] ); ?></span>
+												<?php endif; ?>
+											</td>
 										</tr>
 									<?php endforeach; ?>
 								</tbody>
@@ -755,7 +857,7 @@ class Picot_Mcp_Admin {
 
 				<?php else : ?>
 					<div class="picot-mcp-tab-panel" id="picot-mcp-tab-list" style="padding-top:1em;">
-						<p class="description"><?php echo esc_html__( 'Each key has an acting user and its own features/operations. Effective access is site settings ∩ key settings ∩ user capabilities.', 'picot-mcp' ); ?></p>
+						<p class="description"><?php echo esc_html__( 'Each key has an acting user and its own features/operations. Effective access is site settings ∩ key settings ∩ user capabilities. Plaintext keys are never stored after issue.', 'picot-mcp' ); ?></p>
 						<?php if ( ! empty( $tokens ) ) : ?>
 							<table class="widefat striped picot-mcp-keys-table" style="max-width:960px;">
 								<thead>
@@ -763,7 +865,7 @@ class Picot_Mcp_Admin {
 										<th><?php echo esc_html__( 'Label', 'picot-mcp' ); ?></th>
 										<th><?php echo esc_html__( 'Key', 'picot-mcp' ); ?></th>
 										<th><?php echo esc_html__( 'Acting user', 'picot-mcp' ); ?></th>
-										<th><?php echo esc_html__( 'Created / last used', 'picot-mcp' ); ?></th>
+										<th><?php echo esc_html__( 'Created / last used / expires', 'picot-mcp' ); ?></th>
 										<th></th>
 									</tr>
 								</thead>
@@ -772,19 +874,14 @@ class Picot_Mcp_Admin {
 										<?php
 										$user        = get_user_by( 'id', (int) $token['user_id'] );
 										$user_label  = $user ? $user->user_login : __( '(deleted)', 'picot-mcp' );
-										$token_perms = isset( $token['permissions'] ) && is_array( $token['permissions'] )
-											? $token['permissions']
-											: array_fill_keys( array_keys( $features ), true );
-										$token_ops   = isset( $token['operations'] ) && is_array( $token['operations'] )
-											? $token['operations']
-											: array_fill_keys( array_keys( $operations ), true );
-										$has_secret = Picot_Mcp_Api_Key::has_copyable_secret( $token );
-										$modal_id   = 'picot-mcp-modal-' . sanitize_html_class( $token['token_id'] );
-										$key_label  = isset( $token['label'] ) ? (string) $token['label'] : '';
-										$created    = wp_date( get_option( 'date_format' ), (int) $token['created_at'] );
-										$last_used  = ! empty( $token['last_used_at'] )
+										$modal_id    = 'picot-mcp-modal-' . sanitize_html_class( $token['token_id'] );
+										$created     = wp_date( get_option( 'date_format' ), (int) $token['created_at'] );
+										$last_used   = ! empty( $token['last_used_at'] )
 											? wp_date( get_option( 'date_format' ), (int) $token['last_used_at'] )
 											: '—';
+										$expires     = ! empty( $token['expires_at'] )
+											? wp_date( get_option( 'date_format' ), (int) $token['expires_at'] )
+											: __( 'Never', 'picot-mcp' );
 										?>
 										<tr>
 											<td>
@@ -792,14 +889,10 @@ class Picot_Mcp_Admin {
 											</td>
 											<td>
 												<code class="picot-mcp-key-mask"><?php echo esc_html( Picot_Mcp_Api_Key::masked_display( $token ) ); ?></code>
-												<?php if ( $has_secret ) : ?>
-													<button type="button" class="button button-small picot-mcp-copy" data-copy-token-id="<?php echo esc_attr( $token['token_id'] ); ?>" data-label="<?php echo esc_attr__( 'Copy', 'picot-mcp' ); ?>" data-copied-label="<?php echo esc_attr__( 'Copied', 'picot-mcp' ); ?>"><?php echo esc_html__( 'Copy', 'picot-mcp' ); ?></button>
-													<button type="button" class="button button-small picot-mcp-copy" data-copy-bundle="1" data-copy-token-id="<?php echo esc_attr( $token['token_id'] ); ?>" data-key-label="<?php echo esc_attr( $key_label ); ?>" data-label="<?php echo esc_attr__( 'Copy all', 'picot-mcp' ); ?>" data-copied-label="<?php echo esc_attr__( 'Copied', 'picot-mcp' ); ?>"><?php echo esc_html__( 'Copy all', 'picot-mcp' ); ?></button>
-												<?php endif; ?>
 											</td>
 											<td><?php echo esc_html( $user_label ); ?></td>
 											<td>
-												<span class="description"><?php echo esc_html( $created . ' / ' . $last_used ); ?></span>
+												<span class="description"><?php echo esc_html( $created . ' / ' . $last_used . ' / ' . $expires ); ?></span>
 											</td>
 											<td class="picot-mcp-row-actions">
 												<button type="button" class="button button-small picot-mcp-open-modal" data-modal="<?php echo esc_attr( $modal_id ); ?>">
@@ -820,9 +913,7 @@ class Picot_Mcp_Admin {
 								$token_ops   = isset( $token['operations'] ) && is_array( $token['operations'] )
 									? $token['operations']
 									: array_fill_keys( array_keys( $operations ), true );
-								$has_secret = Picot_Mcp_Api_Key::has_copyable_secret( $token );
-								$modal_id   = 'picot-mcp-modal-' . sanitize_html_class( $token['token_id'] );
-								$key_label  = isset( $token['label'] ) ? (string) $token['label'] : '';
+								$modal_id    = 'picot-mcp-modal-' . sanitize_html_class( $token['token_id'] );
 								?>
 								<div class="picot-mcp-modal" id="<?php echo esc_attr( $modal_id ); ?>" hidden>
 									<div class="picot-mcp-modal__backdrop" data-close-modal></div>
@@ -834,12 +925,7 @@ class Picot_Mcp_Admin {
 										<div class="picot-mcp-modal__body">
 											<p>
 												<code><?php echo esc_html( Picot_Mcp_Api_Key::masked_display( $token ) ); ?></code>
-												<?php if ( $has_secret ) : ?>
-													<button type="button" class="button button-small picot-mcp-copy" data-copy-token-id="<?php echo esc_attr( $token['token_id'] ); ?>" data-label="<?php echo esc_attr__( 'Copy key', 'picot-mcp' ); ?>" data-copied-label="<?php echo esc_attr__( 'Copied', 'picot-mcp' ); ?>"><?php echo esc_html__( 'Copy key', 'picot-mcp' ); ?></button>
-													<button type="button" class="button button-small picot-mcp-copy" data-copy-bundle="1" data-copy-token-id="<?php echo esc_attr( $token['token_id'] ); ?>" data-key-label="<?php echo esc_attr( $key_label ); ?>" data-label="<?php echo esc_attr__( 'Copy all', 'picot-mcp' ); ?>" data-copied-label="<?php echo esc_attr__( 'Copied', 'picot-mcp' ); ?>"><?php echo esc_html__( 'Copy all', 'picot-mcp' ); ?></button>
-												<?php else : ?>
-													<span class="description"><?php echo esc_html__( 'No copyable data. Please issue a new key.', 'picot-mcp' ); ?></span>
-												<?php endif; ?>
+												<span class="description"><?php echo esc_html__( 'Plaintext cannot be shown again. Issue a new key to replace it.', 'picot-mcp' ); ?></span>
 											</p>
 											<table class="form-table" role="presentation">
 												<tr>
@@ -861,6 +947,20 @@ class Picot_Mcp_Admin {
 																<option value="<?php echo esc_attr( (string) $user->ID ); ?>" selected><?php echo esc_html( $user->display_name . ' (' . $user->user_login . ')' ); ?></option>
 															<?php endif; ?>
 														</select>
+													</td>
+												</tr>
+												<tr>
+													<th scope="row"><?php echo esc_html__( 'Expiry', 'picot-mcp' ); ?></th>
+													<td>
+														<label style="display:block;margin-bottom:6px;">
+															<input type="checkbox" name="picot_mcp_edit_expires_never[<?php echo esc_attr( $token['token_id'] ); ?>]" value="1" <?php checked( empty( $token['expires_at'] ) ); ?> />
+															<?php echo esc_html__( 'Never expires', 'picot-mcp' ); ?>
+														</label>
+														<input type="number" min="0" max="3650" name="picot_mcp_edit_expires_days[<?php echo esc_attr( $token['token_id'] ); ?>]" value="" class="small-text" placeholder="90" />
+														<span class="description"><?php echo esc_html__( 'Or set a new lifetime in days from now (leave empty to keep current expiry when “Never” is unchecked).', 'picot-mcp' ); ?></span>
+														<?php if ( ! empty( $token['expires_at'] ) ) : ?>
+															<p class="description"><?php echo esc_html( sprintf( /* translators: %s: date */ __( 'Current expiry: %s', 'picot-mcp' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $token['expires_at'] ) ) ); ?></p>
+														<?php endif; ?>
 													</td>
 												</tr>
 												<tr>

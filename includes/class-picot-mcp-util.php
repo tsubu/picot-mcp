@@ -58,16 +58,25 @@ class Picot_Mcp_Util {
 	 * @return int
 	 */
 	public static function max_zip_upload_bytes() {
-		$default = 50 * 1024 * 1024; // 50 MB.
+		$default = 25 * 1024 * 1024; // 25 MB — intentional product ceiling for Base64 ZIP transfer.
 		$upload  = (int) wp_max_upload_size();
 		$max     = $upload > 0 ? min( $default, $upload ) : $default;
 
 		/**
-		 * Filter maximum ZIP upload size for plugin/theme install_zip.
+		 * Filter maximum ZIP upload size for plugin/theme install_zip / export_zip.
 		 *
 		 * @param int $max Maximum bytes.
 		 */
 		return (int) apply_filters( 'picot_mcp_max_zip_upload_bytes', $max );
+	}
+
+	/**
+	 * Human-readable max ZIP size for admin UI.
+	 *
+	 * @return string
+	 */
+	public static function max_zip_upload_label() {
+		return size_format( self::max_zip_upload_bytes() );
 	}
 
 	/**

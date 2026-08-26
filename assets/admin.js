@@ -58,26 +58,6 @@
 		}, 1500);
 	}
 
-	function revealKey(tokenId) {
-		var cfg = window.picotMcpAdmin || {};
-		var body = new FormData();
-		body.append('action', 'picot_mcp_reveal_key');
-		body.append('nonce', cfg.nonce || '');
-		body.append('token_id', tokenId);
-		return fetch(cfg.ajaxUrl || '', {
-			method: 'POST',
-			credentials: 'same-origin',
-			body: body,
-		}).then(function (res) {
-			return res.json();
-		}).then(function (json) {
-			if (!json || !json.success || !json.data || !json.data.key) {
-				throw new Error((json && json.data && json.data.message) || (cfg.i18n && cfg.i18n.copyFailed) || 'Failed');
-			}
-			return json.data.key;
-		});
-	}
-
 	function closeAllModals() {
 		document.querySelectorAll('.picot-mcp-modal:not([hidden])').forEach(function (modal) {
 			modal.hidden = true;
@@ -102,28 +82,16 @@
 			if (copyBtn.disabled) return;
 
 			var tokenId = copyBtn.getAttribute('data-copy-token-id');
-			var asBundle = copyBtn.getAttribute('data-copy-bundle') === '1';
-			var keyLabel = copyBtn.getAttribute('data-key-label') || '';
-
 			if (tokenId) {
-				copyBtn.disabled = true;
-				revealKey(tokenId)
-					.then(function (key) {
-						var text = asBundle ? buildConnectionBundle(key, keyLabel) : key;
-						return copyText(text);
-					})
-					.then(function (ok) {
-						if (ok) markCopied(copyBtn);
-						else alert((window.picotMcpAdmin && window.picotMcpAdmin.i18n && window.picotMcpAdmin.i18n.copyFailed) || 'Copy failed');
-					})
-					.catch(function (err) {
-						alert(err.message || 'Copy failed');
-					})
-					.finally(function () {
-						copyBtn.disabled = false;
-					});
+				var msg =
+					(window.picotMcpAdmin && window.picotMcpAdmin.i18n && window.picotMcpAdmin.i18n.keyNotRevealed) ||
+					'API keys cannot be shown again after issue.';
+				alert(msg);
 				return;
 			}
+
+			var asBundle = copyBtn.getAttribute('data-copy-bundle') === '1';
+			var keyLabel = copyBtn.getAttribute('data-key-label') || '';
 
 			if (asBundle) {
 				var bundleKey = '';

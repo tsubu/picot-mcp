@@ -93,7 +93,7 @@ class Picot_Mcp_Server {
 			PICOT_MCP_VERSION,
 			array( \WP\MCP\Transport\HttpTransport::class ),
 			\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler::class,
-			\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler::class,
+			Picot_Mcp_Runtime::observability_handler_class(),
 			$tools,
 			array(),
 			array(),

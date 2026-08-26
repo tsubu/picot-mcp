@@ -63,79 +63,83 @@ return array(
 		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-path-processor.php'
 	),
 	'Picot_Mcp_Abilities' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-abilities.php'
 	),
 	'Picot_Mcp_Ability_Content' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/abilities/class-picot-mcp-ability-content.php'
 	),
 	'Picot_Mcp_Ability_Media' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/abilities/class-picot-mcp-ability-media.php'
 	),
 	'Picot_Mcp_Ability_Plugins' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/abilities/class-picot-mcp-ability-plugins.php'
 	),
 	'Picot_Mcp_Ability_Settings' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/abilities/class-picot-mcp-ability-settings.php'
 	),
 	'Picot_Mcp_Ability_Taxonomy' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/abilities/class-picot-mcp-ability-taxonomy.php'
 	),
 	'Picot_Mcp_Ability_Themes' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/abilities/class-picot-mcp-ability-themes.php'
 	),
 	'Picot_Mcp_Ability_Users' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/abilities/class-picot-mcp-ability-users.php'
 	),
 	'Picot_Mcp_Admin' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-admin.php'
 	),
 	'Picot_Mcp_Api_Key' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-api-key.php'
 	),
 	'Picot_Mcp_Auth' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-auth.php'
 	),
 	'Picot_Mcp_Capabilities' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-capabilities.php'
 	),
 	'Picot_Mcp_Errors' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-errors.php'
 	),
 	'Picot_Mcp_Permissions' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-permissions.php'
 	),
 	'Picot_Mcp_Plugin' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-plugin.php'
 	),
+	'Picot_Mcp_Runtime' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/class-picot-mcp-runtime.php'
+	),
 	'Picot_Mcp_Server' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-server.php'
 	),
 	'Picot_Mcp_Settings' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-settings.php'
 	),
 	'Picot_Mcp_Usage_Log' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-usage-log.php'
 	),
 	'Picot_Mcp_Util' => array(
-		'version' => '1.0.0.0',
+		'version' => 'dev-main',
 		'path'    => $baseDir . '/includes/class-picot-mcp-util.php'
 	),
 	'Plugin_Locator' => array(

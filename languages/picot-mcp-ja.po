@@ -2,7 +2,7 @@
 # Copyright (C) PICOT
 msgid ""
 msgstr ""
-"Project-Id-Version: Picot MCP 0.1.11\n"
+"Project-Id-Version: Picot MCP 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/picot-mcp\n"
 "POT-Creation-Date: 2026-08-21T07:09:01+00:00\n"
 "PO-Revision-Date: 2026-08-21 06:30+0000\n"
@@ -1020,3 +1020,100 @@ msgstr ""
 #~ msgstr ""
 #~ "オフにすると、すべての API キーで使えなくなります。サイト設定がキー設定よ"
 #~ "り優先されます。ZIP インストールは「削除・重要操作」とは別です。"
+
+msgid "Or set a new lifetime in days from now (leave empty to keep current expiry when “Never” is unchecked)."
+msgstr "今から何日後に期限切れにするかを指定します。「無期限」のチェックを外したまま日数を空にすると、現在の期限を維持します。"
+
+msgid "Current expiry: %s"
+msgstr "現在の有効期限: %s"
+
+msgid "Expires in"
+msgstr "有効期間"
+
+msgid "Never expires"
+msgstr "無期限"
+
+msgid "days (0 = never)"
+msgstr "日（0 = 無期限）"
+
+msgid "Expiry"
+msgstr "有効期限"
+
+msgid "Never"
+msgstr "無期限"
+
+msgid "A standalone WordPress MCP Adapter plugin is active. Picot MCP bundles its own Adapter as the runtime and disables the Adapter default server. Prefer keeping only one product configuring MCP endpoints to avoid confusion."
+msgstr "スタンドアロンの WordPress MCP Adapter プラグインが有効です。Picot MCP は Adapter をランタイムとして同梱し、Adapter のデフォルトサーバーは無効化します。MCP エンドポイントの設定は一方に寄せることを推奨します。"
+
+msgid "API key has expired."
+msgstr "API キーの有効期限が切れています。"
+
+msgid "API key rate limit exceeded. Try again shortly."
+msgstr "API キーのレート制限に達しました。しばらくしてから再試行してください。"
+
+msgid "Choose features and operations for this key. Items disabled on the Settings tab cannot be used (site ceiling). The plaintext key is shown only once after issue."
+msgstr "このキーの機能と操作を選びます。設定タブで無効な項目は使えません（サイト上限）。平文キーは発行時に一度だけ表示されます。"
+
+msgid "Each key has an acting user and its own features/operations. Effective access is site settings ∩ key settings ∩ user capabilities. Plaintext keys are never stored after issue."
+msgstr "各キーには実行ユーザーと個別の機能／操作があります。実効権限は「サイト設定 ∩ キー設定 ∩ ユーザー権限」です。発行後、平文キーは保存されません。"
+
+msgid "Runtime: WordPress MCP Adapter %s (bundled). Picot provides API keys, scopes, logging, and the admin UI."
+msgstr "ランタイム: WordPress MCP Adapter %s（同梱）。Picot は API キー、スコープ、ログ、管理 UI を提供します。"
+
+
+msgid "Recent MCP tool usage (up to %d entries). Includes user, key id, IP, and failure codes. Request payloads are not stored."
+msgstr "最近の MCP ツール利用（最大 %d 件）。ユーザー、キー ID、IP、失敗コードを含みます。リクエスト本文は保存しません。"
+
+msgid "Failed to copy."
+msgstr "コピーに失敗しました。"
+
+msgid "unknown"
+msgstr "不明"
+
+msgid "Copy this key now. It is shown only once and cannot be retrieved later (hash-only storage)."
+msgstr "このキーを今すぐコピーしてください。表示は発行時のみで、以降は取得できません（ハッシュのみ保存）。"
+
+msgid "API keys cannot be shown again after issue. Create a new key if needed."
+msgstr "発行後に API キーを再表示することはできません。必要なら新しいキーを発行してください。"
+
+msgid "New installs start with MCP disabled. Enable only after reviewing features and issuing a scoped API key."
+msgstr "新規インストールでは MCP は無効です。機能を確認し、スコープ付き API キーを発行してから有効化してください。"
+
+msgid "ZIP transfer can install arbitrary code or exfiltrate plugin/theme sources (max %s). Keep it off unless you trust every API key that has this scope."
+msgstr "ZIP 転送は任意コードのインストールやプラグイン／テーマソースの持ち出しにつながります（上限 %s）。この権限を持つすべての API キーを信頼できる場合以外はオフにしてください。"
+
+msgid "High risk"
+msgstr "高リスク"
+
+msgid "Log retention"
+msgstr "ログ保持件数"
+
+msgid "Number of recent audit log entries to keep (10–500)."
+msgstr "保持する監査ログの件数（10〜500）。"
+
+msgid "Rate limit"
+msgstr "レート制限"
+
+msgid "Max authenticated MCP requests per API key per minute. 0 disables the limit."
+msgstr "API キーあたり1分あたりの認証済み MCP リクエスト上限。0 で無効。"
+
+msgid "Adapter observability"
+msgstr "Adapter の観測"
+
+msgid "Off (null handler)"
+msgstr "オフ（null ハンドラ）"
+
+msgid "PHP error_log"
+msgstr "PHP error_log"
+
+msgid "Optional MCP Adapter observability handler. Usage audit remains in the Logs tab."
+msgstr "任意の MCP Adapter 観測ハンドラです。利用監査はログタブに残ります。"
+
+msgid "Security & logging"
+msgstr "セキュリティとログ"
+
+msgid "Plaintext cannot be shown again. Issue a new key to replace it."
+msgstr "平文は再表示できません。置き換える場合は新しいキーを発行してください。"
+
+msgid "Created / last used / expires"
+msgstr "作成 / 最終利用 / 期限"

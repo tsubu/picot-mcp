@@ -27,6 +27,7 @@ return array(
     'Picot_Mcp_Errors' => $baseDir . '/includes/class-picot-mcp-errors.php',
     'Picot_Mcp_Permissions' => $baseDir . '/includes/class-picot-mcp-permissions.php',
     'Picot_Mcp_Plugin' => $baseDir . '/includes/class-picot-mcp-plugin.php',
+    'Picot_Mcp_Runtime' => $baseDir . '/includes/class-picot-mcp-runtime.php',
     'Picot_Mcp_Server' => $baseDir . '/includes/class-picot-mcp-server.php',
     'Picot_Mcp_Settings' => $baseDir . '/includes/class-picot-mcp-settings.php',
     'Picot_Mcp_Usage_Log' => $baseDir . '/includes/class-picot-mcp-usage-log.php',

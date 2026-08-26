@@ -3,7 +3,7 @@
  * Plugin Name: Picot MCP
  * Plugin URI: https://picot.tokyo/
  * Description: Exposes WordPress as an MCP server with API key authentication and scoped permissions.
- * Version: 0.1.12
+ * Version: 0.2.0
  * Requires at least: 6.9
  * Tested up to: 7.2
  * Requires PHP: 7.4
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PICOT_MCP_VERSION', '0.1.12' );
+define( 'PICOT_MCP_VERSION', '0.2.0' );
 define( 'PICOT_MCP_FILE', __FILE__ );
 define( 'PICOT_MCP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PICOT_MCP_URL', plugin_dir_url( __FILE__ ) );

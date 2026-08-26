@@ -16,6 +16,7 @@ class Picot_Mcp_Settings {
 
 	const TOKEN_OPTION  = 'picot_mcp_token';
 	const TOKENS_OPTION = 'picot_mcp_tokens';
+	const SCHEMA_VERSION = 6;
 
 	/**
 	 * Singleton instance.
@@ -51,32 +52,35 @@ class Picot_Mcp_Settings {
 	}
 
 	/**
-	 * Default settings.
+	 * Default settings (safe for new installs).
 	 *
 	 * @return array
 	 */
 	public static function defaults() {
 		return array(
-			'enabled'          => true,
-			'route_namespace'  => 'picot-mcp',
-			'route'            => 'mcp-server',
-			'allowed_user_ids' => array(),
-			'permissions'      => array(
+			'enabled'               => false,
+			'route_namespace'       => 'picot-mcp',
+			'route'                 => 'mcp-server',
+			'allowed_user_ids'      => array(),
+			'permissions'           => array(
 				'content'  => true,
 				'taxonomy' => true,
 				'media'    => true,
-				'settings' => true,
-				'plugins'  => true,
-				'themes'   => true,
-				'users'    => true,
+				'settings' => false,
+				'plugins'  => false,
+				'themes'   => false,
+				'users'    => false,
 			),
-			'operations'       => array(
+			'operations'            => array(
 				'read'        => true,
-				'write'       => true,
-				'critical'    => true,
-				'zip_install' => true,
+				'write'       => false,
+				'critical'    => false,
+				'zip_install' => false,
 			),
-			'schema_version'   => 5,
+			'log_retention'         => 200,
+			'rate_limit_per_minute' => 120,
+			'observability'         => 'null',
+			'schema_version'        => self::SCHEMA_VERSION,
 		);
 	}
 
@@ -135,35 +139,81 @@ class Picot_Mcp_Settings {
 		}
 		$this->cache['allowed_user_ids'] = array_values( array_unique( $allowed ) );
 
-		$this->maybe_migrate_schema_v5_enable_all_checkboxes();
+		$this->cache['log_retention'] = self::sanitize_log_retention(
+			isset( $this->cache['log_retention'] ) ? $this->cache['log_retention'] : $defaults['log_retention']
+		);
+		$this->cache['rate_limit_per_minute'] = self::sanitize_rate_limit(
+			isset( $this->cache['rate_limit_per_minute'] ) ? $this->cache['rate_limit_per_minute'] : $defaults['rate_limit_per_minute']
+		);
+		$this->cache['observability'] = self::sanitize_observability(
+			isset( $this->cache['observability'] ) ? $this->cache['observability'] : $defaults['observability']
+		);
+
+		$this->maybe_migrate_schema();
 
 		return $this->cache;
 	}
 
 	/**
-	 * Schema v5: product default is all feature/operation checkboxes enabled.
-	 *
-	 * Existing installs with schema &lt; 5 are updated once so the Settings UI
-	 * matches the new defaults (site ceiling all on).
+	 * Schema migrations (never force-open dangerous site ceilings).
 	 *
 	 * @return void
 	 */
-	private function maybe_migrate_schema_v5_enable_all_checkboxes() {
+	private function maybe_migrate_schema() {
 		$version = isset( $this->cache['schema_version'] ) ? (int) $this->cache['schema_version'] : 0;
-		if ( $version >= 5 ) {
+		if ( $version >= self::SCHEMA_VERSION ) {
 			return;
 		}
 
-		$defaults = self::defaults();
-		foreach ( array_keys( $defaults['permissions'] ) as $key ) {
-			$this->cache['permissions'][ $key ] = true;
-		}
-		foreach ( array_keys( $defaults['operations'] ) as $key ) {
-			$this->cache['operations'][ $key ] = true;
-		}
-		$this->cache['schema_version'] = 5;
-
+		// v5 historically force-enabled all checkboxes; do not repeat that for v6+.
+		// Existing permission/operation values are preserved via wp_parse_args above.
+		$this->cache['schema_version'] = self::SCHEMA_VERSION;
 		update_option( PICOT_MCP_OPTION, $this->cache, false );
+
+		// Strip reversible API key secrets (hash-only storage).
+		Picot_Mcp_Api_Key::strip_stored_secrets();
+	}
+
+	/**
+	 * Sanitize log retention count.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return int
+	 */
+	public static function sanitize_log_retention( $value ) {
+		$n = absint( $value );
+		if ( $n < 10 ) {
+			$n = 10;
+		}
+		if ( $n > 500 ) {
+			$n = 500;
+		}
+		return $n;
+	}
+
+	/**
+	 * Sanitize rate limit (0 = disabled).
+	 *
+	 * @param mixed $value Raw value.
+	 * @return int
+	 */
+	public static function sanitize_rate_limit( $value ) {
+		$n = absint( $value );
+		if ( $n > 10000 ) {
+			$n = 10000;
+		}
+		return $n;
+	}
+
+	/**
+	 * Sanitize observability mode.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return string
+	 */
+	public static function sanitize_observability( $value ) {
+		$value = is_string( $value ) ? $value : 'null';
+		return in_array( $value, array( 'null', 'error_log' ), true ) ? $value : 'null';
 	}
 
 	/**
@@ -264,6 +314,33 @@ class Picot_Mcp_Settings {
 	}
 
 	/**
+	 * Log retention count.
+	 *
+	 * @return int
+	 */
+	public function log_retention() {
+		return self::sanitize_log_retention( $this->get( 'log_retention', 200 ) );
+	}
+
+	/**
+	 * Requests per minute per API key (0 = off).
+	 *
+	 * @return int
+	 */
+	public function rate_limit_per_minute() {
+		return self::sanitize_rate_limit( $this->get( 'rate_limit_per_minute', 120 ) );
+	}
+
+	/**
+	 * Observability mode.
+	 *
+	 * @return string
+	 */
+	public function observability() {
+		return self::sanitize_observability( $this->get( 'observability', 'null' ) );
+	}
+
+	/**
 	 * Allowed user IDs for API key binding (empty = any eligible user).
 	 *
 	 * @return int[]
@@ -288,7 +365,6 @@ class Picot_Mcp_Settings {
 		if ( ! empty( $allowed ) ) {
 			return in_array( $user_id, $allowed, true );
 		}
-		// Empty allowlist = same pool as the admin UI (users who can edit posts).
 		return user_can( $user_id, 'edit_posts' );
 	}
 
@@ -334,13 +410,11 @@ class Picot_Mcp_Settings {
 	/**
 	 * Ensure every token has explicit permissions/operations maps.
 	 *
-	 * Legacy tokens without maps inherit current site settings (same effective ceiling as before).
-	 *
 	 * @param array $tokens Raw tokens.
 	 * @return array
 	 */
 	private function normalize_tokens( array $tokens ) {
-		$settings = $this->all();
+		$settings = $this->cache ? $this->cache : self::defaults();
 		$changed  = false;
 		$site_perm = isset( $settings['permissions'] ) && is_array( $settings['permissions'] )
 			? Picot_Mcp_Api_Key::sanitize_permissions_map( $settings['permissions'] )
@@ -365,10 +439,17 @@ class Picot_Mcp_Settings {
 			} else {
 				$tokens[ $i ]['operations'] = Picot_Mcp_Api_Key::sanitize_operations_map( $token['operations'] );
 			}
+			if ( array_key_exists( 'secret', $token ) ) {
+				unset( $tokens[ $i ]['secret'] );
+				$changed = true;
+			}
+			if ( ! array_key_exists( 'expires_at', $tokens[ $i ] ) ) {
+				$tokens[ $i ]['expires_at'] = null;
+				$changed                    = true;
+			}
 		}
 
 		if ( $changed ) {
-			// Persist normalized maps so subsequent loads are explicit.
 			update_option( self::TOKENS_OPTION, $tokens, false );
 		}
 
@@ -394,19 +475,28 @@ class Picot_Mcp_Settings {
 	public function save( array $settings ) {
 		$defaults = self::defaults();
 		$clean    = array(
-			'enabled'          => ! empty( $settings['enabled'] ),
-			'route_namespace'  => self::sanitize_route_segment(
+			'enabled'               => ! empty( $settings['enabled'] ),
+			'route_namespace'       => self::sanitize_route_segment(
 				isset( $settings['route_namespace'] ) ? $settings['route_namespace'] : $defaults['route_namespace'],
 				$defaults['route_namespace']
 			),
-			'route'            => self::sanitize_route_segment(
+			'route'                 => self::sanitize_route_segment(
 				isset( $settings['route'] ) ? $settings['route'] : $defaults['route'],
 				$defaults['route']
 			),
-			'allowed_user_ids' => array(),
-			'permissions'      => array(),
-			'operations'       => array(),
-			'schema_version'   => 5,
+			'allowed_user_ids'      => array(),
+			'permissions'           => array(),
+			'operations'            => array(),
+			'log_retention'         => self::sanitize_log_retention(
+				isset( $settings['log_retention'] ) ? $settings['log_retention'] : $defaults['log_retention']
+			),
+			'rate_limit_per_minute' => self::sanitize_rate_limit(
+				isset( $settings['rate_limit_per_minute'] ) ? $settings['rate_limit_per_minute'] : $defaults['rate_limit_per_minute']
+			),
+			'observability'         => self::sanitize_observability(
+				isset( $settings['observability'] ) ? $settings['observability'] : $defaults['observability']
+			),
+			'schema_version'        => self::SCHEMA_VERSION,
 		);
 
 		if ( ! empty( $settings['allowed_user_ids'] ) && is_array( $settings['allowed_user_ids'] ) ) {
@@ -468,12 +558,12 @@ class Picot_Mcp_Settings {
 	 * @return void
 	 */
 	public function touch_token_last_used_by_id( $token_id, $timestamp ) {
-		$tokens = $this->get_tokens();
+		$tokens  = $this->get_tokens();
 		$changed = false;
 		foreach ( $tokens as $i => $token ) {
 			if ( isset( $token['token_id'] ) && $token['token_id'] === $token_id ) {
 				$tokens[ $i ]['last_used_at'] = (int) $timestamp;
-				$changed = true;
+				$changed                      = true;
 				break;
 			}
 		}

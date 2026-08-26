@@ -19,13 +19,16 @@ class Picot_Mcp_Api_Key {
 	/**
 	 * Generate a new API key bound to a WordPress user.
 	 *
-	 * @param int         $user_id     User ID to act as.
-	 * @param string      $label       Optional label.
-	 * @param array|null  $permissions Optional feature map; defaults to site settings.
-	 * @param array|null  $operations  Optional operation map; defaults to site settings.
+	 * Plaintext is returned once and never stored (hash only).
+	 *
+	 * @param int        $user_id     User ID to act as.
+	 * @param string     $label       Optional label.
+	 * @param array|null $permissions Optional feature map; defaults to site settings.
+	 * @param array|null $operations  Optional operation map; defaults to site settings.
+	 * @param int|null   $expires_at  Optional Unix expiry timestamp (null = never).
 	 * @return array{plaintext:string,token:array}|WP_Error
 	 */
-	public static function generate( $user_id, $label = '', $permissions = null, $operations = null ) {
+	public static function generate( $user_id, $label = '', $permissions = null, $operations = null, $expires_at = null ) {
 		$user_id = absint( $user_id );
 		if ( $user_id < 1 || ! get_user_by( 'id', $user_id ) ) {
 			return Picot_Mcp_Errors::make( 'invalid_parameter', __( 'A valid user is required to issue an API key.', 'picot-mcp' ) );
@@ -58,15 +61,11 @@ class Picot_Mcp_Api_Key {
 		}
 
 		$plaintext = self::PREFIX . $random;
-		$secret    = self::encrypt( $plaintext );
-		if ( '' === $secret ) {
-			return Picot_Mcp_Errors::make( 'internal_error', __( 'Failed to encrypt the API key for storage.', 'picot-mcp' ) );
-		}
+		$expires   = self::sanitize_expires_at( $expires_at );
 
 		$token = array(
 			'token_id'     => wp_generate_uuid4(),
 			'hash'         => self::hash( $plaintext ),
-			'secret'       => $secret,
 			'prefix'       => self::PREFIX . substr( $random, 0, 4 ),
 			'user_id'      => $user_id,
 			'label'        => sanitize_text_field( $label ),
@@ -74,6 +73,7 @@ class Picot_Mcp_Api_Key {
 			'permissions'  => $perm_map,
 			'operations'   => $op_map,
 			'created_at'   => time(),
+			'expires_at'   => $expires,
 			'last_used_at' => null,
 		);
 
@@ -90,10 +90,69 @@ class Picot_Mcp_Api_Key {
 	}
 
 	/**
-	 * Update an existing API key's label, user, features, and operations.
+	 * Remove reversible secrets from all stored tokens (hash-only).
 	 *
-	 * @param string $token_id    Token id.
-	 * @param array  $attributes  label, user_id, permissions, operations.
+	 * @return void
+	 */
+	public static function strip_stored_secrets() {
+		$tokens = get_option( Picot_Mcp_Settings::TOKENS_OPTION, array() );
+		if ( ! is_array( $tokens ) || empty( $tokens ) ) {
+			return;
+		}
+		$changed = false;
+		foreach ( $tokens as $i => $token ) {
+			if ( ! is_array( $token ) ) {
+				continue;
+			}
+			if ( array_key_exists( 'secret', $token ) ) {
+				unset( $tokens[ $i ]['secret'] );
+				$changed = true;
+			}
+		}
+		if ( $changed ) {
+			update_option( Picot_Mcp_Settings::TOKENS_OPTION, array_values( $tokens ), false );
+		}
+	}
+
+	/**
+	 * Sanitize optional expiry timestamp.
+	 *
+	 * @param mixed $expires_at Unix timestamp or null.
+	 * @return int|null
+	 */
+	public static function sanitize_expires_at( $expires_at ) {
+		if ( null === $expires_at || '' === $expires_at || false === $expires_at ) {
+			return null;
+		}
+		$ts = (int) $expires_at;
+		if ( $ts < 1 ) {
+			return null;
+		}
+		return $ts;
+	}
+
+	/**
+	 * Days until expiry from create form (0 = never).
+	 *
+	 * @param mixed $days Days.
+	 * @return int|null Unix timestamp or null.
+	 */
+	public static function expires_at_from_days( $days ) {
+		$days = absint( $days );
+		if ( $days < 1 ) {
+			return null;
+		}
+		if ( $days > 3650 ) {
+			$days = 3650;
+		}
+		return time() + ( $days * DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Update an existing API key's label, user, features, operations, expiry.
+	 *
+	 * @param string $token_id   Token id.
+	 * @param array  $attributes Attributes.
 	 * @return true|WP_Error
 	 */
 	public static function update( $token_id, array $attributes ) {
@@ -130,6 +189,14 @@ class Picot_Mcp_Api_Key {
 				$tokens[ $i ]['operations'] = self::sanitize_operations_map( $attributes['operations'] );
 			}
 
+			if ( array_key_exists( 'expires_at', $attributes ) ) {
+				$tokens[ $i ]['expires_at'] = self::sanitize_expires_at( $attributes['expires_at'] );
+			}
+
+			if ( array_key_exists( 'secret', $tokens[ $i ] ) ) {
+				unset( $tokens[ $i ]['secret'] );
+			}
+
 			break;
 		}
 
@@ -151,8 +218,8 @@ class Picot_Mcp_Api_Key {
 	 * @return array
 	 */
 	public static function sanitize_permissions_map( array $map ) {
-		$keys   = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
-		$clean  = array();
+		$keys  = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
+		$clean = array();
 		foreach ( $keys as $key ) {
 			$clean[ $key ] = ! empty( $map[ $key ] );
 		}
@@ -212,108 +279,25 @@ class Picot_Mcp_Api_Key {
 	}
 
 	/**
-	 * Derive a 32-byte encryption key from WordPress salts.
-	 *
-	 * @return string Binary key material.
-	 */
-	private static function encryption_key() {
-		// Keep this stable so previously stored secrets remain decryptable.
-		return hash( 'sha256', wp_salt( 'auth' ) . '|picot-mcp-key', true );
-	}
-
-	/**
-	 * Encrypt plaintext so admins can later decrypt/copy it.
-	 *
-	 * Simple reversible format: "v1:" + base64( iv[16] + ciphertext ).
-	 * Auth uses hash(); this secret is only for admin reveal/copy.
-	 *
-	 * @param string $plaintext Plaintext API key.
-	 * @return string Encrypted payload or empty on failure.
-	 */
-	public static function encrypt( $plaintext ) {
-		if ( ! is_string( $plaintext ) || '' === $plaintext ) {
-			return '';
-		}
-		if ( ! function_exists( 'openssl_encrypt' ) ) {
-			return '';
-		}
-
-		try {
-			$iv = random_bytes( 16 );
-		} catch ( Exception $e ) {
-			return '';
-		}
-
-		$cipher = openssl_encrypt( $plaintext, 'AES-256-CBC', self::encryption_key(), OPENSSL_RAW_DATA, $iv );
-		if ( false === $cipher ) {
-			return '';
-		}
-
-		return 'v1:' . base64_encode( $iv . $cipher );
-	}
-
-	/**
-	 * Decrypt a stored secret back to the plaintext API key.
-	 *
-	 * Supports current "v1:" payloads and legacy unversioned base64(iv+cipher).
-	 *
-	 * @param string $payload Payload from encrypt().
-	 * @return string Plaintext or empty string.
-	 */
-	public static function decrypt( $payload ) {
-		if ( ! is_string( $payload ) || '' === $payload ) {
-			return '';
-		}
-		if ( ! function_exists( 'openssl_decrypt' ) ) {
-			return '';
-		}
-
-		$raw_b64 = $payload;
-		if ( 0 === strpos( $payload, 'v1:' ) ) {
-			$raw_b64 = substr( $payload, 3 );
-		}
-
-		$raw = base64_decode( $raw_b64, true );
-		if ( false === $raw || strlen( $raw ) < 17 ) {
-			return '';
-		}
-
-		$iv     = substr( $raw, 0, 16 );
-		$cipher = substr( $raw, 16 );
-		$plain  = openssl_decrypt( $cipher, 'AES-256-CBC', self::encryption_key(), OPENSSL_RAW_DATA, $iv );
-
-		return is_string( $plain ) ? $plain : '';
-	}
-
-	/**
-	 * Whether a token has an encrypted secret that can be decrypted for copy.
+	 * Keys are not re-displayable after issue (hash-only storage).
 	 *
 	 * @param array $token Token row.
 	 * @return bool
 	 */
 	public static function has_copyable_secret( array $token ) {
-		return '' !== self::reveal_plaintext( $token );
+		unset( $token );
+		return false;
 	}
 
 	/**
-	 * Reveal plaintext for an admin copy action (decrypt + hash check).
+	 * Reveal plaintext — always empty (issue-once policy).
 	 *
 	 * @param array $token Token row.
 	 * @return string
 	 */
 	public static function reveal_plaintext( array $token ) {
-		if ( empty( $token['secret'] ) || ! is_string( $token['secret'] ) ) {
-			return '';
-		}
-		$plain = self::decrypt( $token['secret'] );
-		if ( '' === $plain ) {
-			return '';
-		}
-		// Integrity: decrypted value must match the verification hash.
-		if ( empty( $token['hash'] ) || ! hash_equals( (string) $token['hash'], self::hash( $plain ) ) ) {
-			return '';
-		}
-		return $plain;
+		unset( $token );
+		return '';
 	}
 
 	/**
@@ -348,6 +332,10 @@ class Picot_Mcp_Api_Key {
 			return Picot_Mcp_Errors::make( 'invalid_api_key', __( 'Invalid API key.', 'picot-mcp' ) );
 		}
 
+		if ( ! empty( $matched['expires_at'] ) && (int) $matched['expires_at'] > 0 && time() > (int) $matched['expires_at'] ) {
+			return Picot_Mcp_Errors::make( 'invalid_api_key', __( 'API key has expired.', 'picot-mcp' ) );
+		}
+
 		$user_id = (int) $matched['user_id'];
 		if ( ! get_user_by( 'id', $user_id ) ) {
 			return Picot_Mcp_Errors::make( 'invalid_api_key', __( 'API key owner no longer exists.', 'picot-mcp' ) );
@@ -357,9 +345,36 @@ class Picot_Mcp_Api_Key {
 			return Picot_Mcp_Errors::make( 'invalid_api_key', __( 'API key owner is no longer allowed.', 'picot-mcp' ) );
 		}
 
+		$rate = self::check_rate_limit( $matched );
+		if ( is_wp_error( $rate ) ) {
+			return $rate;
+		}
+
 		self::touch_last_used( $matched );
 
 		return $matched;
+	}
+
+	/**
+	 * Per-key request rate limit.
+	 *
+	 * @param array $token Token data.
+	 * @return true|WP_Error
+	 */
+	public static function check_rate_limit( array $token ) {
+		$limit = Picot_Mcp_Settings::instance()->rate_limit_per_minute();
+		if ( $limit < 1 || empty( $token['token_id'] ) ) {
+			return true;
+		}
+
+		$key   = 'picot_mcp_rl_' . md5( (string) $token['token_id'] );
+		$count = (int) get_transient( $key );
+		if ( $count >= $limit ) {
+			return Picot_Mcp_Errors::make( 'rate_limited', __( 'API key rate limit exceeded. Try again shortly.', 'picot-mcp' ) );
+		}
+
+		set_transient( $key, $count + 1, MINUTE_IN_SECONDS );
+		return true;
 	}
 
 	/**
@@ -408,7 +423,6 @@ class Picot_Mcp_Api_Key {
 		if ( ! empty( $allowed ) ) {
 			$args['include'] = $allowed;
 		} else {
-			// Default pool: users who can at least edit posts (content operators).
 			$args['capability'] = array( 'edit_posts' );
 		}
 

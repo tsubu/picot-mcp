@@ -55,6 +55,7 @@ class ComposerStaticInitee9196fa459c031947ad97072e4132a0
         'Picot_Mcp_Errors' => __DIR__ . '/../..' . '/includes/class-picot-mcp-errors.php',
         'Picot_Mcp_Permissions' => __DIR__ . '/../..' . '/includes/class-picot-mcp-permissions.php',
         'Picot_Mcp_Plugin' => __DIR__ . '/../..' . '/includes/class-picot-mcp-plugin.php',
+        'Picot_Mcp_Runtime' => __DIR__ . '/../..' . '/includes/class-picot-mcp-runtime.php',
         'Picot_Mcp_Server' => __DIR__ . '/../..' . '/includes/class-picot-mcp-server.php',
         'Picot_Mcp_Settings' => __DIR__ . '/../..' . '/includes/class-picot-mcp-settings.php',
         'Picot_Mcp_Usage_Log' => __DIR__ . '/../..' . '/includes/class-picot-mcp-usage-log.php',

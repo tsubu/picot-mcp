@@ -169,7 +169,14 @@ class Picot_Mcp_Abilities {
 	 * @return array
 	 */
 	public static function respond( $feature, $action, $result ) {
-		Picot_Mcp_Usage_Log::record( $feature, $action, ! is_wp_error( $result ) );
+		$ok      = ! is_wp_error( $result );
+		$code    = '';
+		$message = '';
+		if ( is_wp_error( $result ) ) {
+			$code    = $result->get_error_code();
+			$message = $result->get_error_message();
+		}
+		Picot_Mcp_Usage_Log::record( $feature, $action, $ok, $code, $message );
 		return self::format_result( $result );
 	}
 

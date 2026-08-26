@@ -4,7 +4,7 @@ Tags: mcp, ai, abilities, rest-api, api
 Requires at least: 6.9
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 0.1.12
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,11 +14,14 @@ Expose WordPress as an MCP server with API key auth and scoped permissions.
 
 Picot MCP turns your WordPress site into an MCP (Model Context Protocol) server so AI clients such as Cursor or Claude Code can work with content safely.
 
-* One MCP URL and API keys to connect
-* Multiple API keys with per-key scopes
+Architecture: the official WordPress MCP Adapter is the protocol runtime; Picot adds the product layer (API keys, scopes, admin UI, audit log).
+
+* One MCP URL and API keys to connect (plaintext shown only once at issue)
+* Multiple API keys with per-key scopes, optional expiry, and rate limits
 * Seven feature toggles (posts/pages, taxonomies, media, settings, plugins, themes, users)
-* Operation levels including Plugin/theme ZIP transfer (export + install)
+* Operation levels including Plugin/theme ZIP transfer (export + install) — off by default
 * Plugin/theme ZIP export and install via Base64, plus wordpress.org slugs
+* Audit log with user, key id, IP, and failure codes
 * Admin UI available in English with Japanese translation
 * Built on the WordPress Abilities API and official MCP Adapter
 
@@ -26,7 +29,7 @@ Picot MCP turns your WordPress site into an MCP (Model Context Protocol) server 
 
 1. Upload the `picot-mcp` folder to `/wp-content/plugins/`
 2. Activate the plugin through the Plugins screen
-3. Open Settings → MCP, enable the server, issue an API key, and copy the MCP URL into your client
+3. Open Settings → MCP, enable the server, review the site ceiling, issue an API key, and copy the key immediately (it cannot be shown again)
 
 == Frequently Asked Questions ==
 
@@ -40,13 +43,25 @@ Only administrators (`manage_options`).
 
 = What is the default MCP endpoint? =
 
-New installs use `/wp-json/picot-mcp/mcp-server`. Existing sites keep their previously saved route until changed in Settings.
+New installs use `/wp-json/picot-mcp/mcp-server` with MCP disabled until you enable it. Existing sites keep their previously saved route until changed in Settings.
 
 = Can I transfer custom plugin or theme packages? =
 
-Yes. Use `export_zip` on the source site and `install_zip` on the destination (`filename`, `base64_data`, optional `overwrite`). Enable Plugins or Themes plus **Plugin/theme ZIP transfer** on both the site ceiling and the API key.
+Yes. Use `export_zip` on the source site and `install_zip` on the destination (`filename`, `base64_data`, optional `overwrite`). Enable Plugins or Themes plus **Plugin/theme ZIP transfer** on both the site ceiling and the API key. Treat ZIP transfer as high risk.
+
+= Can I copy an API key again later? =
+
+No. Keys are stored as irreversible hashes. Copy the plaintext when it is issued, or create a new key.
 
 == Changelog ==
+
+= 0.2.0 =
+* Product hardening: safe defaults (MCP off; critical/ZIP/plugins/themes/users off)
+* API keys are issue-once (hash-only; no reversible secret in the database)
+* Key expiry and per-key rate limiting
+* Stronger audit log (token id, IP, failure code/message; configurable retention)
+* Adapter runtime status, optional observability handler, ZIP size ceiling 25MB + admin warnings
+* Smoke tests for sanitize helpers and safe defaults (kept outside the plugin package for Plugin Check)
 
 = 0.1.12 =
 * Add “Copy all” for MCP connection snippet (site name, label, URL, key)
