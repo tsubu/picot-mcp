@@ -233,7 +233,7 @@ class Picot_Mcp_Api_Key {
 	 * @return array
 	 */
 	public static function sanitize_operations_map( array $map ) {
-		$keys  = array( 'read', 'write', 'critical', 'zip_install' );
+		$keys  = array( 'read', 'write', 'critical' );
 		$clean = array();
 		foreach ( $keys as $key ) {
 			$clean[ $key ] = ! empty( $map[ $key ] );

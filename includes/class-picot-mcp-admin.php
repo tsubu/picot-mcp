@@ -194,7 +194,7 @@ class Picot_Mcp_Admin {
 				$label    = isset( $_POST['picot_mcp_key_label'] ) ? sanitize_text_field( wp_unslash( $_POST['picot_mcp_key_label'] ) ) : '';
 				$settings = Picot_Mcp_Settings::instance();
 				$features = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
-				$ops      = array( 'read', 'write', 'critical', 'zip_install' );
+				$ops      = array( 'read', 'write', 'critical' );
 				$perms    = array();
 				$opers    = array();
 				$feat_src = $this->sanitize_checkbox_map( $this->post_array( 'picot_mcp_new_feature' ) );
@@ -239,7 +239,7 @@ class Picot_Mcp_Admin {
 				$label    = isset( $_POST['picot_mcp_edit_label'][ $token_id ] ) ? sanitize_text_field( wp_unslash( $_POST['picot_mcp_edit_label'][ $token_id ] ) ) : '';
 				$settings = Picot_Mcp_Settings::instance();
 				$features = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
-				$ops      = array( 'read', 'write', 'critical', 'zip_install' );
+				$ops      = array( 'read', 'write', 'critical' );
 				$perms    = array();
 				$opers    = array();
 				$edit_features = $this->post_array( 'picot_mcp_edit_feature' );
@@ -375,7 +375,7 @@ class Picot_Mcp_Admin {
 				$settings['permissions'][ $feature ] = ! empty( $_POST['picot_mcp_feature'][ $feature ] );
 			}
 
-			$ops = array( 'read', 'write', 'critical', 'zip_install' );
+			$ops = array( 'read', 'write', 'critical' );
 			foreach ( $ops as $op ) {
 				$settings['operations'][ $op ] = ! empty( $_POST['picot_mcp_operation'][ $op ] );
 			}
@@ -495,10 +495,9 @@ class Picot_Mcp_Admin {
 		);
 
 		$operations = array(
-			'read'        => __( 'Read', 'picot-mcp' ),
-			'write'       => __( 'Create & edit', 'picot-mcp' ),
-			'critical'    => __( 'Delete & critical', 'picot-mcp' ),
-			'zip_install' => __( 'Plugin/theme ZIP transfer', 'picot-mcp' ),
+			'read'     => __( 'Read', 'picot-mcp' ),
+			'write'    => __( 'Create & edit', 'picot-mcp' ),
+			'critical' => __( 'Delete & critical', 'picot-mcp' ),
 		);
 
 		if ( 'saved' === $notice ) {
@@ -610,18 +609,7 @@ class Picot_Mcp_Admin {
 						<hr />
 
 						<h2><?php echo esc_html__( 'Site-wide features & operations (ceiling)', 'picot-mcp' ); ?></h2>
-						<p class="description"><?php echo esc_html__( 'Turning an item off disables it for every API key. Site settings override per-key settings. ZIP transfer (export/install) is separate from Delete & critical.', 'picot-mcp' ); ?></p>
-						<div class="notice notice-warning inline" style="margin:0 0 1em;">
-							<p>
-								<?php
-								printf(
-									/* translators: %s: max ZIP size label */
-									esc_html__( 'ZIP transfer can install arbitrary code or exfiltrate plugin/theme sources (max %s). Keep it off unless you trust every API key that has this scope.', 'picot-mcp' ),
-									esc_html( Picot_Mcp_Util::max_zip_upload_label() )
-								);
-								?>
-							</p>
-						</div>
+						<p class="description"><?php echo esc_html__( 'Turning an item off disables it for every API key. Site settings override per-key settings. Plugin/theme install and update are limited to wordpress.org. Activation must be done in WordPress admin.', 'picot-mcp' ); ?></p>
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php echo esc_html__( 'Features', 'picot-mcp' ); ?></th>
@@ -644,9 +632,6 @@ class Picot_Mcp_Admin {
 											<label style="display:block;margin-bottom:4px;">
 												<input type="checkbox" name="picot_mcp_operation[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( ! empty( $settings['operations'][ $key ] ) ); ?> />
 												<?php echo esc_html( $label ); ?>
-												<?php if ( 'zip_install' === $key ) : ?>
-													<span class="description"> — <?php echo esc_html__( 'High risk', 'picot-mcp' ); ?></span>
-												<?php endif; ?>
 											</label>
 										<?php endforeach; ?>
 									</fieldset>

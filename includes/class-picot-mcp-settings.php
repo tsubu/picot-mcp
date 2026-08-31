@@ -16,7 +16,7 @@ class Picot_Mcp_Settings {
 
 	const TOKEN_OPTION  = 'picot_mcp_token';
 	const TOKENS_OPTION = 'picot_mcp_tokens';
-	const SCHEMA_VERSION = 6;
+	const SCHEMA_VERSION = 7;
 
 	/**
 	 * Singleton instance.
@@ -72,10 +72,9 @@ class Picot_Mcp_Settings {
 				'users'    => false,
 			),
 			'operations'            => array(
-				'read'        => true,
-				'write'       => false,
-				'critical'    => false,
-				'zip_install' => false,
+				'read'     => true,
+				'write'    => false,
+				'critical' => false,
 			),
 			'log_retention'         => 200,
 			'rate_limit_per_minute' => 120,
@@ -118,6 +117,7 @@ class Picot_Mcp_Settings {
 			isset( $this->cache['operations'] ) && is_array( $this->cache['operations'] ) ? $this->cache['operations'] : array(),
 			$defaults['operations']
 		);
+		unset( $this->cache['operations']['zip_install'] );
 
 		$this->cache['route_namespace'] = self::sanitize_route_segment(
 			isset( $this->cache['route_namespace'] ) ? $this->cache['route_namespace'] : $defaults['route_namespace'],
@@ -166,12 +166,19 @@ class Picot_Mcp_Settings {
 		}
 
 		// v5 historically force-enabled all checkboxes; do not repeat that for v6+.
-		// Existing permission/operation values are preserved via wp_parse_args above.
+		// v7: drop removed zip_install operation from site ceilings.
+		if ( isset( $this->cache['operations'] ) && is_array( $this->cache['operations'] ) ) {
+			unset( $this->cache['operations']['zip_install'] );
+		}
+
 		$this->cache['schema_version'] = self::SCHEMA_VERSION;
 		update_option( PICOT_MCP_OPTION, $this->cache, false );
 
 		// Strip reversible API key secrets (hash-only storage).
 		Picot_Mcp_Api_Key::strip_stored_secrets();
+
+		// Normalize tokens so removed operation keys (e.g. zip_install) are purged from storage.
+		$this->get_tokens();
 	}
 
 	/**
@@ -431,13 +438,21 @@ class Picot_Mcp_Settings {
 				$tokens[ $i ]['permissions'] = $site_perm;
 				$changed                     = true;
 			} else {
-				$tokens[ $i ]['permissions'] = Picot_Mcp_Api_Key::sanitize_permissions_map( $token['permissions'] );
+				$sanitized = Picot_Mcp_Api_Key::sanitize_permissions_map( $token['permissions'] );
+				if ( $sanitized !== $token['permissions'] ) {
+					$tokens[ $i ]['permissions'] = $sanitized;
+					$changed                     = true;
+				}
 			}
 			if ( empty( $token['operations'] ) || ! is_array( $token['operations'] ) ) {
 				$tokens[ $i ]['operations'] = $site_ops;
 				$changed                    = true;
 			} else {
-				$tokens[ $i ]['operations'] = Picot_Mcp_Api_Key::sanitize_operations_map( $token['operations'] );
+				$sanitized = Picot_Mcp_Api_Key::sanitize_operations_map( $token['operations'] );
+				if ( $sanitized !== $token['operations'] ) {
+					$tokens[ $i ]['operations'] = $sanitized;
+					$changed                    = true;
+				}
 			}
 			if ( array_key_exists( 'secret', $token ) ) {
 				unset( $tokens[ $i ]['secret'] );

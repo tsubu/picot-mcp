@@ -1,10 +1,10 @@
 === Picot MCP ===
-Contributors: picot
+Contributors: tsubu
 Tags: mcp, ai, abilities, rest-api, api
 Requires at least: 6.9
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 0.2.0
+Stable tag: 0.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,10 +19,9 @@ Architecture: the official WordPress MCP Adapter is the protocol runtime; Picot 
 * One MCP URL and API keys to connect (plaintext shown only once at issue)
 * Multiple API keys with per-key scopes, optional expiry, and rate limits
 * Seven feature toggles (posts/pages, taxonomies, media, settings, plugins, themes, users)
-* Operation levels including Plugin/theme ZIP transfer (export + install) — off by default
-* Plugin/theme ZIP export and install via Base64, plus wordpress.org slugs
+* Plugin/theme install and update from wordpress.org slugs only
+* Plugin/theme activation, deactivation, and ZIP package transfer are not available via MCP (use WordPress admin)
 * Audit log with user, key id, IP, and failure codes
-* Admin UI available in English with Japanese translation
 * Built on the WordPress Abilities API and official MCP Adapter
 
 == Installation ==
@@ -45,9 +44,9 @@ Only administrators (`manage_options`).
 
 New installs use `/wp-json/picot-mcp/mcp-server` with MCP disabled until you enable it. Existing sites keep their previously saved route until changed in Settings.
 
-= Can I transfer custom plugin or theme packages? =
+= Can I install custom plugin or theme ZIP packages via MCP? =
 
-Yes. Use `export_zip` on the source site and `install_zip` on the destination (`filename`, `base64_data`, optional `overwrite`). Enable Plugins or Themes plus **Plugin/theme ZIP transfer** on both the site ceiling and the API key. Treat ZIP transfer as high risk.
+No. Install and update are limited to packages from wordpress.org. There is no ZIP install or ZIP export via MCP. Activate or deactivate plugins and themes in WordPress admin.
 
 = Can I copy an API key again later? =
 
@@ -55,12 +54,26 @@ No. Keys are stored as irreversible hashes. Copy the plaintext when it is issued
 
 == Changelog ==
 
+= 0.2.3 =
+* Audit: purge legacy zip_install from stored settings and API keys
+* Audit: block self-deletion of Picot MCP via the plugins ability
+* Audit: limit dependency/admin error notices to plugin-related admin screens
+
+= 0.2.2 =
+* Remove Plugin/theme ZIP export and the zip_install operation entirely
+
+= 0.2.1 =
+* WordPress.org review: remove arbitrary Base64 ZIP install for plugins/themes
+* WordPress.org review: remove MCP activate/deactivate for plugins and theme switch
+* Install/update remain wordpress.org-only; delete requires the plugin to already be inactive in admin
+* Contributors list uses WordPress.org username; translation files omitted from directory package
+
 = 0.2.0 =
-* Product hardening: safe defaults (MCP off; critical/ZIP/plugins/themes/users off)
+* Product hardening: safe defaults (MCP off; critical/plugins/themes/users off)
 * API keys are issue-once (hash-only; no reversible secret in the database)
 * Key expiry and per-key rate limiting
 * Stronger audit log (token id, IP, failure code/message; configurable retention)
-* Adapter runtime status, optional observability handler, ZIP size ceiling 25MB + admin warnings
+* Adapter runtime status, optional observability handler, admin warnings
 * Smoke tests for sanitize helpers and safe defaults (kept outside the plugin package for Plugin Check)
 
 = 0.1.12 =

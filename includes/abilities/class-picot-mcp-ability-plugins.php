@@ -24,30 +24,18 @@ class Picot_Mcp_Ability_Plugins {
 			'picot-mcp/plugins',
 			array(
 				'label'               => __( 'WordPress Plugins', 'picot-mcp' ),
-				'description'         => __( 'List and manage plugins. Install from wordpress.org, transfer ZIP packages via Base64 export/install.', 'picot-mcp' ),
+				'description'         => __( 'List and manage plugins. Install and update from wordpress.org only. Activation and deactivation must be done in WordPress admin.', 'picot-mcp' ),
 				'category'            => 'picot-mcp',
 				'input_schema'        => Picot_Mcp_Abilities::action_input_schema(
-					array( 'list', 'get', 'install', 'install_zip', 'export_zip', 'activate', 'deactivate', 'update', 'delete' ),
+					array( 'list', 'get', 'install', 'update', 'delete' ),
 					array(
-						'plugin'      => array(
+						'plugin' => array(
 							'type'        => 'string',
 							'description' => __( 'Plugin file (folder/file.php) or wordpress.org slug for install.', 'picot-mcp' ),
 						),
-						'slug'        => array(
+						'slug'   => array(
 							'type'        => 'string',
 							'description' => __( 'wordpress.org plugin slug (install only).', 'picot-mcp' ),
-						),
-						'filename'    => array(
-							'type'        => 'string',
-							'description' => __( 'ZIP filename for install_zip / optional export_zip name (must end with .zip).', 'picot-mcp' ),
-						),
-						'base64_data' => array(
-							'type'        => 'string',
-							'description' => __( 'Base64-encoded ZIP contents for install_zip.', 'picot-mcp' ),
-						),
-						'overwrite'   => array(
-							'type'        => 'boolean',
-							'description' => __( 'Overwrite an existing plugin package when using install_zip.', 'picot-mcp' ),
 						),
 					)
 				),
@@ -88,20 +76,15 @@ class Picot_Mcp_Ability_Plugins {
 				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::get_plugin( $input ) );
 			case 'install':
 				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::install_plugin( $input ) );
-			case 'install_zip':
-				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::install_plugin_zip( $input ) );
-			case 'export_zip':
-				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::export_plugin_zip( $input ) );
-			case 'activate':
-				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::activate_plugin_action( $input ) );
-			case 'deactivate':
-				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::deactivate_plugin_action( $input ) );
 			case 'update':
 				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::update_plugin( $input ) );
 			case 'delete':
 				return Picot_Mcp_Abilities::respond( 'plugins', $action, self::delete_plugin( $input ) );
 			default:
-				return Picot_Mcp_Abilities::respond( 'plugins', $action, 					Picot_Mcp_Errors::make( 'invalid_parameter', __( 'Unknown action.', 'picot-mcp' ) )
+				return Picot_Mcp_Abilities::respond(
+					'plugins',
+					$action,
+					Picot_Mcp_Errors::make( 'invalid_parameter', __( 'Unknown action.', 'picot-mcp' ) )
 				);
 		}
 	}
@@ -112,10 +95,10 @@ class Picot_Mcp_Ability_Plugins {
 	 * @return array
 	 */
 	private static function list_plugins() {
-		$all      = get_plugins();
-		$active   = get_option( 'active_plugins', array() );
-		$updates  = get_site_transient( 'update_plugins' );
-		$items    = array();
+		$all     = get_plugins();
+		$active  = get_option( 'active_plugins', array() );
+		$updates = get_site_transient( 'update_plugins' );
+		$items   = array();
 
 		foreach ( $all as $file => $data ) {
 			$items[] = array(
@@ -213,147 +196,6 @@ class Picot_Mcp_Ability_Plugins {
 	}
 
 	/**
-	 * Install (or overwrite) a plugin from a Base64 ZIP package.
-	 *
-	 * @param array $input Input.
-	 * @return array|WP_Error
-	 */
-	private static function install_plugin_zip( array $input ) {
-		$filename = isset( $input['filename'] ) ? (string) $input['filename'] : 'plugin.zip';
-		$b64      = isset( $input['base64_data'] ) ? $input['base64_data'] : '';
-		$tmp      = Picot_Mcp_Util::write_base64_zip_temp( $filename, $b64 );
-		if ( is_wp_error( $tmp ) ) {
-			return $tmp;
-		}
-
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/misc.php';
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-		$overwrite = ! empty( $input['overwrite'] );
-		$skin      = new Automatic_Upgrader_Skin();
-		$upgrader  = new Plugin_Upgrader( $skin );
-		$result    = $upgrader->install(
-			$tmp,
-			array(
-				'overwrite_package' => $overwrite,
-			)
-		);
-
-		if ( file_exists( $tmp ) ) {
-			wp_delete_file( $tmp );
-		}
-
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-		if ( ! $result ) {
-			$messages = $skin->get_upgrade_messages();
-			$detail   = is_array( $messages ) && ! empty( $messages ) ? implode( ' ', $messages ) : '';
-			return Picot_Mcp_Errors::make(
-				'internal_error',
-				$detail ? $detail : __( 'Plugin ZIP installation failed.', 'picot-mcp' )
-			);
-		}
-
-		return array(
-			'plugin'    => $upgrader->plugin_info(),
-			'installed' => true,
-			'overwrite' => $overwrite,
-			'source'    => 'zip',
-		);
-	}
-
-	/**
-	 * Export an installed plugin as a Base64 ZIP package.
-	 *
-	 * @param array $input Input.
-	 * @return array|WP_Error
-	 */
-	private static function export_plugin_zip( array $input ) {
-		$file = isset( $input['plugin'] ) ? self::sanitize_plugin_file( $input['plugin'] ) : '';
-		if ( ! $file ) {
-			return Picot_Mcp_Errors::make( 'invalid_parameter', __( 'plugin is required.', 'picot-mcp' ) );
-		}
-
-		$all = get_plugins();
-		if ( ! isset( $all[ $file ] ) ) {
-			return Picot_Mcp_Errors::make( 'resource_not_found', __( 'Plugin not found.', 'picot-mcp' ) );
-		}
-
-		$plugin_root = wp_normalize_path( WP_PLUGIN_DIR );
-		$dir_name    = dirname( $file );
-		if ( '.' === $dir_name || '' === $dir_name ) {
-			$source       = $plugin_root . '/' . $file;
-			$archive_root = wp_basename( $file );
-			$slug         = pathinfo( $archive_root, PATHINFO_FILENAME );
-		} else {
-			$source       = $plugin_root . '/' . $dir_name;
-			$archive_root = $dir_name;
-			$slug         = $dir_name;
-		}
-
-		$allowed = Picot_Mcp_Util::assert_path_under_base( $source, $plugin_root );
-		if ( is_wp_error( $allowed ) ) {
-			return $allowed;
-		}
-
-		$filename = isset( $input['filename'] ) ? (string) $input['filename'] : ( $slug . '.zip' );
-		$payload  = Picot_Mcp_Util::zip_path_to_base64( $source, $archive_root, $filename );
-		if ( is_wp_error( $payload ) ) {
-			return $payload;
-		}
-
-		return array(
-			'plugin'      => $file,
-			'filename'    => $payload['filename'],
-			'base64_data' => $payload['base64_data'],
-			'bytes'       => $payload['bytes'],
-			'source'      => 'zip',
-		);
-	}
-
-	/**
-	 * Activate plugin.
-	 *
-	 * @param array $input Input.
-	 * @return array|WP_Error
-	 */
-	private static function activate_plugin_action( array $input ) {
-		$file = isset( $input['plugin'] ) ? self::sanitize_plugin_file( $input['plugin'] ) : '';
-		if ( ! $file ) {
-			return Picot_Mcp_Errors::make( 'invalid_parameter', __( 'plugin is required.', 'picot-mcp' ) );
-		}
-		$result = activate_plugin( $file );
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-		return array(
-			'plugin' => $file,
-			'active' => true,
-		);
-	}
-
-	/**
-	 * Deactivate plugin.
-	 *
-	 * @param array $input Input.
-	 * @return array|WP_Error
-	 */
-	private static function deactivate_plugin_action( array $input ) {
-		$file = isset( $input['plugin'] ) ? self::sanitize_plugin_file( $input['plugin'] ) : '';
-		if ( ! $file ) {
-			return Picot_Mcp_Errors::make( 'invalid_parameter', __( 'plugin is required.', 'picot-mcp' ) );
-		}
-		deactivate_plugins( $file );
-		return array(
-			'plugin' => $file,
-			'active' => false,
-		);
-	}
-
-	/**
 	 * Update plugin.
 	 *
 	 * @param array $input Input.
@@ -392,7 +234,7 @@ class Picot_Mcp_Ability_Plugins {
 	}
 
 	/**
-	 * Delete plugin.
+	 * Delete plugin (must already be inactive in WordPress admin).
 	 *
 	 * @param array $input Input.
 	 * @return array|WP_Error
@@ -403,7 +245,16 @@ class Picot_Mcp_Ability_Plugins {
 			return Picot_Mcp_Errors::make( 'invalid_parameter', __( 'plugin is required.', 'picot-mcp' ) );
 		}
 		if ( is_plugin_active( $file ) ) {
-			deactivate_plugins( $file );
+			return Picot_Mcp_Errors::make(
+				'operation_not_allowed',
+				__( 'Deactivate the plugin in WordPress admin before deleting via MCP.', 'picot-mcp' )
+			);
+		}
+		if ( plugin_basename( PICOT_MCP_FILE ) === $file ) {
+			return Picot_Mcp_Errors::make(
+				'operation_not_allowed',
+				__( 'This plugin cannot delete itself via MCP.', 'picot-mcp' )
+			);
 		}
 		$result = delete_plugins( array( $file ) );
 		if ( is_wp_error( $result ) ) {

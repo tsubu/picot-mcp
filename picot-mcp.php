@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Picot MCP
- * Plugin URI: https://picot.tokyo/
+ * Plugin URI: https://github.com/tsubu/picot-mcp
  * Description: Exposes WordPress as an MCP server with API key authentication and scoped permissions.
- * Version: 0.2.0
+ * Version: 0.2.3
  * Requires at least: 6.9
  * Tested up to: 7.2
  * Requires PHP: 7.4
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PICOT_MCP_VERSION', '0.2.0' );
+define( 'PICOT_MCP_VERSION', '0.2.3' );
 define( 'PICOT_MCP_FILE', __FILE__ );
 define( 'PICOT_MCP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PICOT_MCP_URL', plugin_dir_url( __FILE__ ) );
@@ -31,7 +31,7 @@ if ( ! file_exists( PICOT_MCP_PATH . 'vendor/autoload_packages.php' ) && ! file_
 	add_action(
 		'admin_notices',
 		static function () {
-			if ( ! current_user_can( 'activate_plugins' ) ) {
+			if ( ! current_user_can( 'activate_plugins' ) || ! picot_mcp_is_plugin_admin_screen() ) {
 				return;
 			}
 			echo '<div class="notice notice-error"><p>';
@@ -47,6 +47,22 @@ if ( file_exists( PICOT_MCP_PATH . 'vendor/autoload_packages.php' ) ) {
 	require_once PICOT_MCP_PATH . 'vendor/autoload_packages.php';
 } else {
 	require_once PICOT_MCP_PATH . 'vendor/autoload.php';
+}
+
+/**
+ * Whether the current admin screen is plugin-related (limit admin notices).
+ *
+ * @return bool
+ */
+function picot_mcp_is_plugin_admin_screen() {
+	if ( ! is_admin() || ! function_exists( 'get_current_screen' ) ) {
+		return false;
+	}
+	$screen = get_current_screen();
+	if ( ! $screen || empty( $screen->id ) ) {
+		return false;
+	}
+	return in_array( $screen->id, array( 'plugins', 'plugin-install', 'settings_page_picot-mcp' ), true );
 }
 
 /**
@@ -76,7 +92,7 @@ add_action( 'plugins_loaded', 'picot_mcp_bootstrap' );
  * @return void
  */
 function picot_mcp_abilities_missing_notice() {
-	if ( ! current_user_can( 'activate_plugins' ) ) {
+	if ( ! current_user_can( 'activate_plugins' ) || ! picot_mcp_is_plugin_admin_screen() ) {
 		return;
 	}
 	echo '<div class="notice notice-error"><p>';
@@ -90,7 +106,7 @@ function picot_mcp_abilities_missing_notice() {
  * @return void
  */
 function picot_mcp_adapter_missing_notice() {
-	if ( ! current_user_can( 'activate_plugins' ) ) {
+	if ( ! current_user_can( 'activate_plugins' ) || ! picot_mcp_is_plugin_admin_screen() ) {
 		return;
 	}
 	echo '<div class="notice notice-error"><p>';

@@ -20,18 +20,14 @@ class Picot_Mcp_Permissions {
 	 * @var array<string, string>
 	 */
 	private static $action_operations = array(
-		'list'        => 'read',
-		'search'      => 'read',
-		'get'         => 'read',
-		'create'      => 'write',
-		'update'      => 'write',
-		'upload'      => 'write',
-		'delete'      => 'critical',
-		'install'     => 'critical',
-		'install_zip' => 'zip_install',
-		'export_zip'  => 'zip_install',
-		'activate'    => 'critical',
-		'deactivate'  => 'critical',
+		'list'    => 'read',
+		'search'  => 'read',
+		'get'     => 'read',
+		'create'  => 'write',
+		'update'  => 'write',
+		'upload'  => 'write',
+		'delete'  => 'critical',
+		'install' => 'critical',
 	);
 
 	/**
@@ -69,25 +65,18 @@ class Picot_Mcp_Permissions {
 			'update' => 'manage_options',
 		),
 		'plugins'  => array(
-			'list'        => 'activate_plugins',
-			'get'         => 'activate_plugins',
-			'install'     => 'install_plugins',
-			'install_zip' => 'install_plugins',
-			'export_zip'  => 'install_plugins',
-			'activate'    => 'activate_plugins',
-			'deactivate'  => 'activate_plugins',
-			'update'      => 'update_plugins',
-			'delete'      => 'delete_plugins',
+			'list'    => 'activate_plugins',
+			'get'     => 'activate_plugins',
+			'install' => 'install_plugins',
+			'update'  => 'update_plugins',
+			'delete'  => 'delete_plugins',
 		),
 		'themes'   => array(
-			'list'        => 'switch_themes',
-			'get'         => 'switch_themes',
-			'install'     => 'install_themes',
-			'install_zip' => 'install_themes',
-			'export_zip'  => 'install_themes',
-			'activate'    => 'switch_themes',
-			'update'      => 'update_themes',
-			'delete'      => 'delete_themes',
+			'list'    => 'switch_themes',
+			'get'     => 'switch_themes',
+			'install' => 'install_themes',
+			'update'  => 'update_themes',
+			'delete'  => 'delete_themes',
 		),
 		'users'    => array(
 			'list'   => 'list_users',
@@ -285,13 +274,10 @@ class Picot_Mcp_Permissions {
 	 * @return string
 	 */
 	public static function operation_for_action( $action, $feature = '' ) {
-		// Spec: plugin/theme mutating actions are "critical", except ZIP package install.
+		// Spec: plugin/theme mutating actions are "critical".
 		if ( in_array( $feature, array( 'plugins', 'themes' ), true ) ) {
 			if ( in_array( $action, array( 'list', 'get', 'search' ), true ) ) {
 				return 'read';
-			}
-			if ( in_array( $action, array( 'install_zip', 'export_zip' ), true ) ) {
-				return 'zip_install';
 			}
 			return 'critical';
 		}
