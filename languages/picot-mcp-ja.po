@@ -1117,3 +1117,15 @@ msgstr "平文は再表示できません。置き換える場合は新しいキ
 
 msgid "Created / last used / expires"
 msgstr "作成 / 最終利用 / 期限"
+
+msgid "Set the following MCP for this agent.\n\nMCP endpoint\n%1$s\n\nAPI key\n%2$s"
+msgstr "このエージェントに、以下のMCPを設定してください。\n\nMCPエンドポイント\n%1$s\n\nAPIキー\n%2$s"
+
+msgid "Agent prompt"
+msgstr "エージェントプロンプト"
+
+msgid "Copy and paste this into your AI agent to configure MCP access."
+msgstr "AIエージェントにコピー＆ペーストして、MCPアクセスを設定してください。"
+
+msgid "Copy prompt"
+msgstr "プロンプトをコピー"

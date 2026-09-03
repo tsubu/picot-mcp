@@ -525,6 +525,22 @@ class Picot_Mcp_Admin {
 					</p>
 					<p class="description"><?php echo esc_html__( 'Copy this key now. It is shown only once and cannot be retrieved later (hash-only storage).', 'picot-mcp' ); ?></p>
 				</div>
+				<?php
+				$prompt_text = sprintf(
+					/* translators: 1: MCP endpoint URL, 2: API key */
+					__( "Set the following MCP for this agent.\n\nMCP endpoint\n%1\$s\n\nAPI key\n%2\$s", 'picot-mcp' ),
+					Picot_Mcp_Server::endpoint_url(),
+					$issued_key
+				);
+				?>
+				<div style="margin-top:1em;">
+					<label for="picot-mcp-agent-prompt"><strong><?php echo esc_html__( 'Agent prompt', 'picot-mcp' ); ?></strong></label>
+					<p class="description" style="margin-bottom:4px;"><?php echo esc_html__( 'Copy and paste this into your AI agent to configure MCP access.', 'picot-mcp' ); ?></p>
+					<textarea id="picot-mcp-agent-prompt" readonly class="large-text code" rows="7" style="max-width:48em;font-family:Consolas,Monaco,monospace;" onclick="this.select();"><?php echo esc_textarea( $prompt_text ); ?></textarea>
+					<p style="margin-top:4px;">
+						<button type="button" class="button picot-mcp-copy" data-copy-target="picot-mcp-agent-prompt" data-label="<?php echo esc_attr__( 'Copy prompt', 'picot-mcp' ); ?>" data-copied-label="<?php echo esc_attr__( 'Copied', 'picot-mcp' ); ?>"><?php echo esc_html__( 'Copy prompt', 'picot-mcp' ); ?></button>
+					</p>
+				</div>
 			<?php endif; ?>
 
 			<form method="post" action="">
