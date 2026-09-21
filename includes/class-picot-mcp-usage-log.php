@@ -24,15 +24,7 @@ class Picot_Mcp_Usage_Log {
 	 * @return array<string, string>
 	 */
 	public static function feature_labels() {
-		return array(
-			'content'  => __( 'Posts & pages', 'picot-mcp' ),
-			'taxonomy' => __( 'Categories & tags', 'picot-mcp' ),
-			'media'    => __( 'Media', 'picot-mcp' ),
-			'settings' => __( 'Site settings', 'picot-mcp' ),
-			'plugins'  => __( 'Plugins', 'picot-mcp' ),
-			'themes'   => __( 'Themes', 'picot-mcp' ),
-			'users'    => __( 'Users', 'picot-mcp' ),
-		);
+		return Picot_Mcp_Settings::feature_labels();
 	}
 
 	/**

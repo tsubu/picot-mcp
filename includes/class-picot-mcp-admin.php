@@ -48,12 +48,13 @@ class Picot_Mcp_Admin {
 	}
 
 	/**
-	 * Add Settings → MCP.
+	 * Add Settings → MCP (never a top-level sidebar item).
 	 *
 	 * @return void
 	 */
 	public function add_menu() {
-		add_options_page(
+		add_submenu_page(
+			'options-general.php',
 			__( 'Picot MCP', 'picot-mcp' ),
 			__( 'MCP', 'picot-mcp' ),
 			Picot_Mcp_Capabilities::menu_capability(),
@@ -193,7 +194,7 @@ class Picot_Mcp_Admin {
 				}
 				$label    = isset( $_POST['picot_mcp_key_label'] ) ? sanitize_text_field( wp_unslash( $_POST['picot_mcp_key_label'] ) ) : '';
 				$settings = Picot_Mcp_Settings::instance();
-				$features = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
+				$features = Picot_Mcp_Settings::feature_keys();
 				$ops      = array( 'read', 'write', 'critical' );
 				$perms    = array();
 				$opers    = array();
@@ -238,7 +239,7 @@ class Picot_Mcp_Admin {
 				$user_id  = isset( $_POST['picot_mcp_edit_user'][ $token_id ] ) ? absint( wp_unslash( $_POST['picot_mcp_edit_user'][ $token_id ] ) ) : 0;
 				$label    = isset( $_POST['picot_mcp_edit_label'][ $token_id ] ) ? sanitize_text_field( wp_unslash( $_POST['picot_mcp_edit_label'][ $token_id ] ) ) : '';
 				$settings = Picot_Mcp_Settings::instance();
-				$features = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
+				$features = Picot_Mcp_Settings::feature_keys();
 				$ops      = array( 'read', 'write', 'critical' );
 				$perms    = array();
 				$opers    = array();
@@ -370,7 +371,7 @@ class Picot_Mcp_Admin {
 				? sanitize_text_field( wp_unslash( $_POST['picot_mcp_route'] ) )
 				: $settings['route'];
 
-			$features = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
+			$features = Picot_Mcp_Settings::feature_keys();
 			foreach ( $features as $feature ) {
 				$settings['permissions'][ $feature ] = ! empty( $_POST['picot_mcp_feature'][ $feature ] );
 			}
@@ -484,15 +485,7 @@ class Picot_Mcp_Admin {
 			)
 		);
 
-		$features = array(
-			'content'  => __( 'Posts & pages', 'picot-mcp' ),
-			'taxonomy' => __( 'Categories & tags', 'picot-mcp' ),
-			'media'    => __( 'Media', 'picot-mcp' ),
-			'settings' => __( 'Site settings', 'picot-mcp' ),
-			'plugins'  => __( 'Plugins', 'picot-mcp' ),
-			'themes'   => __( 'Themes', 'picot-mcp' ),
-			'users'    => __( 'Users', 'picot-mcp' ),
-		);
+		$features = Picot_Mcp_Settings::feature_labels();
 
 		$operations = array(
 			'read'     => __( 'Read', 'picot-mcp' ),
@@ -625,7 +618,7 @@ class Picot_Mcp_Admin {
 						<hr />
 
 						<h2><?php echo esc_html__( 'Site-wide features & operations (ceiling)', 'picot-mcp' ); ?></h2>
-						<p class="description"><?php echo esc_html__( 'Turning an item off disables it for every API key. Site settings override per-key settings. Plugin/theme install and update are limited to wordpress.org. Activation must be done in WordPress admin.', 'picot-mcp' ); ?></p>
+						<p class="description"><?php echo esc_html__( 'Turning an item off disables it for every API key. Site settings override per-key settings. Plugin/theme install and update are limited to wordpress.org. Activation must be done in WordPress admin. Product tools (SEO Writer, AIO Optimizer, Editor Converter) appear only when the matching plugin is active and the feature is enabled here.', 'picot-mcp' ); ?></p>
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php echo esc_html__( 'Features', 'picot-mcp' ); ?></th>

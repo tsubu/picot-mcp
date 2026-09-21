@@ -48,6 +48,7 @@ class Picot_Mcp_Server {
 		add_action( 'mcp_adapter_init', array( $this, 'register_server' ) );
 		add_filter( 'mcp_adapter_tool_name', array( $this, 'filter_tool_name' ), 10, 2 );
 		add_filter( 'mcp_adapter_tools_list', array( $this, 'filter_tools_list' ), 10, 2 );
+		add_filter( 'mcp_adapter_initialize_response', array( $this, 'filter_initialize_response' ), 10, 2 );
 	}
 
 	/**
@@ -110,24 +111,78 @@ class Picot_Mcp_Server {
 	 */
 	public function filter_tool_name( $name, $ability ) {
 		$map = array(
-			'picot-mcp/content'  => 'wp_content',
-			'picot-mcp/taxonomy' => 'wp_taxonomy',
-			'picot-mcp/media'    => 'wp_media',
-			'picot-mcp/settings' => 'wp_settings',
-			'picot-mcp/plugins'  => 'wp_plugins',
-			'picot-mcp/themes'   => 'wp_themes',
-			'picot-mcp/users'    => 'wp_users',
+			'picot-mcp/content'                       => 'wp_content',
+			'picot-mcp/taxonomy'                      => 'wp_taxonomy',
+			'picot-mcp/media'                         => 'wp_media',
+			'picot-mcp/settings'                      => 'wp_settings',
+			'picot-mcp/plugins'                       => 'wp_plugins',
+			'picot-mcp/themes'                        => 'wp_themes',
+			'picot-mcp/users'                         => 'wp_users',
+			// Built-in Picot product integrations (also filterable).
+			'picot-ai-seo-writer/article'             => 'picot_seo_writer',
+			'picot-aio-ai-content-optimizer/optimize' => 'picot_aio_optimizer',
+			'picot-editor-converter/convert'          => 'picot_editor_converter',
 		);
+
+		/**
+		 * Filter ability-name → MCP tool-name map.
+		 *
+		 * @param array<string, string> $map Ability name => tool name.
+		 */
+		$map = apply_filters( 'picot_mcp_tool_name_map', $map );
+		if ( ! is_array( $map ) ) {
+			$map = array();
+		}
 
 		$ability_name = $ability->get_name();
 		return isset( $map[ $ability_name ] ) ? $map[ $ability_name ] : $name;
 	}
 
 	/**
+	 * Advertise that the tools list can change (settings / product plugins).
+	 *
+	 * Cursor and other clients cache tools aggressively when listChanged is false,
+	 * so newly enabled product tools never appear until a full client reset.
+	 *
+	 * @param \WP\McpSchema\Common\Protocol\DTO\InitializeResult $result Initialize result.
+	 * @param \WP\MCP\Core\McpServer                             $server Server.
+	 * @return \WP\McpSchema\Common\Protocol\DTO\InitializeResult
+	 */
+	public function filter_initialize_response( $result, $server ) {
+		unset( $server );
+		if ( ! is_object( $result ) || ! method_exists( $result, 'toArray' ) ) {
+			return $result;
+		}
+
+		$data = $result->toArray();
+		if ( ! is_array( $data ) ) {
+			return $result;
+		}
+
+		if ( ! isset( $data['capabilities'] ) || ! is_array( $data['capabilities'] ) ) {
+			$data['capabilities'] = array();
+		}
+		if ( ! isset( $data['capabilities']['tools'] ) || ! is_array( $data['capabilities']['tools'] ) ) {
+			$data['capabilities']['tools'] = array();
+		}
+		$data['capabilities']['tools']['listChanged'] = true;
+
+		if ( ! class_exists( '\WP\McpSchema\Common\Protocol\DTO\InitializeResult' ) ) {
+			return $result;
+		}
+
+		try {
+			return \WP\McpSchema\Common\Protocol\DTO\InitializeResult::fromArray( $data );
+		} catch ( \Throwable $e ) {
+			return $result;
+		}
+	}
+
+	/**
 	 * Hide tools the current API key is not allowed to use.
 	 *
-	 * @param array                   $tools Tools.
-	 * @param \WP\MCP\Core\McpServer  $server Server.
+	 * @param array                  $tools  Tools.
+	 * @param \WP\MCP\Core\McpServer $server Server.
 	 * @return array
 	 */
 	public function filter_tools_list( $tools, $server ) {
@@ -142,14 +197,27 @@ class Picot_Mcp_Server {
 		}
 
 		$tool_feature = array(
-			'wp_content'  => 'content',
-			'wp_taxonomy' => 'taxonomy',
-			'wp_media'    => 'media',
-			'wp_settings' => 'settings',
-			'wp_plugins'  => 'plugins',
-			'wp_themes'   => 'themes',
-			'wp_users'    => 'users',
+			'wp_content'             => 'content',
+			'wp_taxonomy'            => 'taxonomy',
+			'wp_media'               => 'media',
+			'wp_settings'            => 'settings',
+			'wp_plugins'             => 'plugins',
+			'wp_themes'              => 'themes',
+			'wp_users'               => 'users',
+			'picot_seo_writer'       => 'seo_writer',
+			'picot_aio_optimizer'    => 'aio_optimizer',
+			'picot_editor_converter' => 'editor_converter',
 		);
+
+		/**
+		 * Filter MCP tool-name → feature-key map used for tools/list scoping.
+		 *
+		 * @param array<string, string> $tool_feature Tool name => feature key.
+		 */
+		$tool_feature = apply_filters( 'picot_mcp_tool_feature_map', $tool_feature );
+		if ( ! is_array( $tool_feature ) ) {
+			$tool_feature = array();
+		}
 
 		$filtered = array();
 		foreach ( $tools as $tool ) {

@@ -4,7 +4,7 @@ Tags: mcp, ai, abilities, rest-api, api
 Requires at least: 6.9
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 0.2.3
+Stable tag: 0.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,7 +18,7 @@ Architecture: the official WordPress MCP Adapter is the protocol runtime; Picot 
 
 * One MCP URL and API keys to connect (plaintext shown only once at issue)
 * Multiple API keys with per-key scopes, optional expiry, and rate limits
-* Seven feature toggles (posts/pages, taxonomies, media, settings, plugins, themes, users)
+* Feature toggles for core WordPress areas plus optional Picot product integrations (SEO Writer, AIO Optimizer, Editor Converter)
 * Plugin/theme install and update from wordpress.org slugs only
 * Plugin/theme activation, deactivation, and ZIP package transfer are not available via MCP (use WordPress admin)
 * Audit log with user, key id, IP, and failure codes
@@ -53,6 +53,15 @@ No. Install and update are limited to packages from wordpress.org. There is no Z
 No. Keys are stored as irreversible hashes. Copy the plaintext when it is issued, or create a new key.
 
 == Changelog ==
+
+= 0.3.1 =
+* Advertise tools.listChanged so MCP clients (e.g. Cursor) refresh product tools after reconnect
+* Register known Picot product tool name maps in core so discovery does not depend only on late filters
+
+= 0.3.0 =
+* Add optional Picot product MCP tools (SEO Writer, AIO Optimizer, Editor Converter) behind site/API key feature toggles
+* Keep the admin screen under Settings → MCP only (no top-level sidebar menu)
+* Expose integration filters for ability names and tool maps
 
 = 0.2.3 =
 * Audit: purge legacy zip_install from stored settings and API keys

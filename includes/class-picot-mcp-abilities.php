@@ -30,6 +30,17 @@ class Picot_Mcp_Abilities {
 	);
 
 	/**
+	 * Optional Picot product integrations (ability must be registered by the product plugin).
+	 *
+	 * @var array<string, string>
+	 */
+	const INTEGRATION_ABILITIES = array(
+		'seo_writer'       => 'picot-ai-seo-writer/article',
+		'aio_optimizer'    => 'picot-aio-ai-content-optimizer/optimize',
+		'editor_converter' => 'picot-editor-converter/convert',
+	);
+
+	/**
 	 * Singleton instance.
 	 *
 	 * @var Picot_Mcp_Abilities|null
@@ -71,7 +82,38 @@ class Picot_Mcp_Abilities {
 				$names[] = $ability;
 			}
 		}
-		return $names;
+		foreach ( self::INTEGRATION_ABILITIES as $feature => $ability ) {
+			if ( ! $settings->is_feature_enabled( $feature ) ) {
+				continue;
+			}
+			// Only expose when the product plugin registered the ability.
+			if ( function_exists( 'wp_get_ability' ) && wp_get_ability( $ability ) ) {
+				$names[] = $ability;
+			}
+		}
+
+		/**
+		 * Filter ability names exposed on the Picot MCP server.
+		 *
+		 * Product plugins may append additional ability names.
+		 *
+		 * @param string[] $names Ability names.
+		 */
+		$names = apply_filters( 'picot_mcp_ability_names', $names );
+
+		if ( ! is_array( $names ) ) {
+			return array();
+		}
+
+		$clean = array();
+		foreach ( $names as $name ) {
+			$name = is_string( $name ) ? trim( $name ) : '';
+			if ( '' !== $name ) {
+				$clean[] = $name;
+			}
+		}
+
+		return array_values( array_unique( $clean ) );
 	}
 
 	/**
@@ -146,6 +188,7 @@ class Picot_Mcp_Abilities {
 					'description' => __( 'Whether the operation succeeded.', 'picot-mcp' ),
 				),
 				'data'    => array(
+					'type'        => array( 'object', 'array', 'string', 'number', 'boolean', 'null' ),
 					'description' => __( 'Result payload.', 'picot-mcp' ),
 				),
 				'error'   => array(

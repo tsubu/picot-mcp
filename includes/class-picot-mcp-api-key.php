@@ -218,7 +218,7 @@ class Picot_Mcp_Api_Key {
 	 * @return array
 	 */
 	public static function sanitize_permissions_map( array $map ) {
-		$keys  = array( 'content', 'taxonomy', 'media', 'settings', 'plugins', 'themes', 'users' );
+		$keys  = Picot_Mcp_Settings::feature_keys();
 		$clean = array();
 		foreach ( $keys as $key ) {
 			$clean[ $key ] = ! empty( $map[ $key ] );

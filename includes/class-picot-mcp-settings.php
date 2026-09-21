@@ -16,7 +16,7 @@ class Picot_Mcp_Settings {
 
 	const TOKEN_OPTION  = 'picot_mcp_token';
 	const TOKENS_OPTION = 'picot_mcp_tokens';
-	const SCHEMA_VERSION = 7;
+	const SCHEMA_VERSION = 8;
 
 	/**
 	 * Singleton instance.
@@ -63,13 +63,16 @@ class Picot_Mcp_Settings {
 			'route'                 => 'mcp-server',
 			'allowed_user_ids'      => array(),
 			'permissions'           => array(
-				'content'  => true,
-				'taxonomy' => true,
-				'media'    => true,
-				'settings' => false,
-				'plugins'  => false,
-				'themes'   => false,
-				'users'    => false,
+				'content'           => true,
+				'taxonomy'          => true,
+				'media'             => true,
+				'settings'          => false,
+				'plugins'           => false,
+				'themes'            => false,
+				'users'             => false,
+				'seo_writer'        => false,
+				'aio_optimizer'     => false,
+				'editor_converter'  => false,
 			),
 			'operations'            => array(
 				'read'     => true,
@@ -167,8 +170,15 @@ class Picot_Mcp_Settings {
 
 		// v5 historically force-enabled all checkboxes; do not repeat that for v6+.
 		// v7: drop removed zip_install operation from site ceilings.
+		// v8: add product integration features (default off).
 		if ( isset( $this->cache['operations'] ) && is_array( $this->cache['operations'] ) ) {
 			unset( $this->cache['operations']['zip_install'] );
+		}
+		$defaults_perm = self::defaults()['permissions'];
+		if ( ! isset( $this->cache['permissions'] ) || ! is_array( $this->cache['permissions'] ) ) {
+			$this->cache['permissions'] = $defaults_perm;
+		} else {
+			$this->cache['permissions'] = wp_parse_args( $this->cache['permissions'], $defaults_perm );
 		}
 
 		$this->cache['schema_version'] = self::SCHEMA_VERSION;
@@ -373,6 +383,35 @@ class Picot_Mcp_Settings {
 			return in_array( $user_id, $allowed, true );
 		}
 		return user_can( $user_id, 'edit_posts' );
+	}
+
+	/**
+	 * Feature key => admin label (includes product integrations).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function feature_labels() {
+		return array(
+			'content'          => __( 'Posts & pages', 'picot-mcp' ),
+			'taxonomy'         => __( 'Categories & tags', 'picot-mcp' ),
+			'media'            => __( 'Media', 'picot-mcp' ),
+			'settings'         => __( 'Site settings', 'picot-mcp' ),
+			'plugins'          => __( 'Plugins', 'picot-mcp' ),
+			'themes'           => __( 'Themes', 'picot-mcp' ),
+			'users'            => __( 'Users', 'picot-mcp' ),
+			'seo_writer'       => __( 'Picot AI SEO Writer', 'picot-mcp' ),
+			'aio_optimizer'    => __( 'Picot AIO AI Content Optimizer', 'picot-mcp' ),
+			'editor_converter' => __( 'Picot Editor Converter', 'picot-mcp' ),
+		);
+	}
+
+	/**
+	 * Permission feature keys in stable order.
+	 *
+	 * @return string[]
+	 */
+	public static function feature_keys() {
+		return array_keys( self::defaults()['permissions'] );
 	}
 
 	/**

@@ -20,14 +20,18 @@ class Picot_Mcp_Permissions {
 	 * @var array<string, string>
 	 */
 	private static $action_operations = array(
-		'list'    => 'read',
-		'search'  => 'read',
-		'get'     => 'read',
-		'create'  => 'write',
-		'update'  => 'write',
-		'upload'  => 'write',
-		'delete'  => 'critical',
-		'install' => 'critical',
+		'list'     => 'read',
+		'search'   => 'read',
+		'get'      => 'read',
+		'analyze'  => 'read',
+		'create'   => 'write',
+		'update'   => 'write',
+		'upload'   => 'write',
+		'generate' => 'write',
+		'rewrite'  => 'write',
+		'convert'  => 'write',
+		'delete'   => 'critical',
+		'install'  => 'critical',
 	);
 
 	/**
@@ -78,13 +82,23 @@ class Picot_Mcp_Permissions {
 			'update'  => 'update_themes',
 			'delete'  => 'delete_themes',
 		),
-		'users'    => array(
+		'users'            => array(
 			'list'   => 'list_users',
 			'search' => 'list_users',
 			'get'    => 'list_users',
 			'create' => 'create_users',
 			'update' => 'edit_users',
 			'delete' => 'delete_users',
+		),
+		'seo_writer'       => array(
+			'generate' => 'edit_posts',
+		),
+		'aio_optimizer'    => array(
+			'analyze' => 'edit_posts',
+			'rewrite' => 'edit_posts',
+		),
+		'editor_converter' => array(
+			'convert' => 'edit_posts',
 		),
 	);
 
