@@ -6,7 +6,7 @@
  * Version: 0.3.1
  * Requires at least: 6.9
  * Tested up to: 7.2
- * Requires PHP: 7.4
+ * Requires PHP: 8.3
  * Author: PICOT
  * Author URI: https://picot.tokyo/
  * License: GPL-2.0-or-later
